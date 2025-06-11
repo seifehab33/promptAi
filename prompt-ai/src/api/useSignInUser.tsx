@@ -1,21 +1,12 @@
-import axios, { AxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SignInData, SignResponse } from "@/types/type";
 import { useRouter } from "next/navigation";
-
-interface ErrorResponse {
-  message: string;
-}
+import api from "./axios";
+import { AxiosError } from "axios";
 
 const signInUser = async (data: SignInData) => {
-  const response = await axios.post<SignResponse>(
-    "http://localhost:3001/auth/login",
-    data,
-    {
-      withCredentials: true,
-    }
-  );
+  const response = await api.post<SignResponse>("/auth/login", data);
   return response.data;
 };
 
@@ -29,7 +20,7 @@ function useSignInUser() {
         router.push("/Dashboard");
       }, 1500);
     },
-    onError: (error: AxiosError<ErrorResponse>) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       const errorMessage = error.response?.data?.message || error.message;
       toast.error(`Error signing in: ${errorMessage}`);
     },

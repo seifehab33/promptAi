@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import api from "./axios";
 const getPrompts = async () => {
-  const response = await axios.get("http://localhost:3001/prompts", {
-    withCredentials: true,
-  });
+  const response = await api.get("/prompts");
   return response.data;
 };
 function useGetPrompts() {

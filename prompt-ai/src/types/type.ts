@@ -31,3 +31,4 @@ export interface Prompt {
   createdAt: Date;
   updatedAt: Date;
 }
+export type PromptUpdate = Partial<Prompt>;

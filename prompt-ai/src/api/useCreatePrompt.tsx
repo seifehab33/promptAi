@@ -8,7 +8,7 @@ declare global {
       ai: {
         chat: (
           prompt: string,
-          options: { stream: boolean; model: string }
+          options: { stream: boolean; model: string; context?: string }
         ) => AsyncIterable<{ text: string }>;
       };
     };
@@ -18,22 +18,26 @@ declare global {
 interface PromptGenerationParams {
   prompt: string;
   model?: string;
+  context?: string;
 }
 
 interface Response {
   id: string;
   text: string;
   prompt: string;
+  context?: string;
 }
 
 const generatePrompt = async ({
   prompt,
   model = "gpt-4",
+  context,
 }: PromptGenerationParams) => {
   try {
     const response = await window.puter.ai.chat(prompt, {
       stream: true,
       model,
+      context,
     });
     return response;
   } catch (error) {
@@ -77,6 +81,7 @@ function useCreatePrompt() {
             id: Date.now().toString(),
             text: fullResponse,
             prompt: variables.prompt,
+            context: variables.context,
           },
         ]);
       } catch (error) {

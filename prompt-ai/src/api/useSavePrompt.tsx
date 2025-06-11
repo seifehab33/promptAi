@@ -1,29 +1,29 @@
 import { CreatePromptData, ErrorResponse } from "@/types/type";
-import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
+import api from "./axios";
 
 const savePrompt = async (data: CreatePromptData) => {
-  const response = await axios.post(
-    "http://localhost:3001/prompts",
-    {
-      ...data,
-      promptTitle: data.promptTitle || "Untitled Prompt",
-      promptTags: data.promptTags || [],
-      isPublic: data.isPublic || false,
-    },
-    {
-      withCredentials: true,
-    }
-  );
+  if (!data.promptTitle?.trim()) {
+    throw new Error("Prompt title is required");
+  }
+
+  const response = await api.post("/prompts", {
+    ...data,
+    promptTags: data.promptTags || [],
+    isPublic: data.isPublic || false,
+  });
   return response.data;
 };
 
 function useSavePrompt() {
+  const queryClient = useQueryClient();
   const { mutate, data, error, isPending } = useMutation({
     mutationFn: savePrompt,
     onSuccess: () => {
       toast.success("Prompt created successfully!");
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
     },
     onError: (error: AxiosError<ErrorResponse>) => {
       const errorMessage = error.response?.data?.message || error.message;

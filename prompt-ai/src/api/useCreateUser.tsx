@@ -1,17 +1,12 @@
 "use client";
-import axios, { AxiosError } from "axios";
 import { SignResponse, SignUpData } from "@/types/type";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import api from "./axios";
+import { AxiosError } from "axios";
 const createUser = async (data: SignUpData) => {
-  const response = await axios.post<SignResponse>(
-    "http://localhost:3001/auth/register",
-    data,
-    {
-      withCredentials: true,
-    }
-  );
+  const response = await api.post<SignResponse>("/auth/register", data);
   return response.data;
 };
 function useCreateUser() {
@@ -24,7 +19,7 @@ function useCreateUser() {
         router.push("/Editor");
       }, 1900);
     },
-    onError: (error: AxiosError) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(`Error creating user: ${error.message}`);
       setTimeout(() => {
         router.push("/");

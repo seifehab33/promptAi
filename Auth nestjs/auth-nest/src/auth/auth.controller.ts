@@ -14,8 +14,6 @@ import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { CreateUserDto } from 'src/user/dto/user.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { Serialize } from 'src/interceptor/serialize.interceptor';
-import { NewUserDto } from 'src/user/dto/new-user.dto';
 
 import { Response } from 'express';
 @Controller('auth')
@@ -26,8 +24,7 @@ export class AuthController {
   async login(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(dto);
 
-    // Set cookies with secure settings
-    const maxAge = dto.rememberMe ? 7 * 24 * 60 * 60 * 1000 : 15 * 60 * 1000;
+    const maxAge = 7 * 24 * 60 * 60 * 1000;
 
     res.cookie('access_token', tokens.data.access_token, {
       httpOnly: true,
@@ -59,9 +56,7 @@ export class AuthController {
     };
     const result = await this.authService.register(dto, authDto);
 
-    const maxAge = authDto.rememberMe
-      ? 7 * 24 * 60 * 60 * 1000
-      : 15 * 60 * 1000;
+    const maxAge = 7 * 24 * 60 * 60 * 1000;
 
     res.cookie('access_token', result.data.access_token, {
       httpOnly: true,
@@ -83,22 +78,15 @@ export class AuthController {
   }
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(
-    @Req() req,
-    @Body('authDto') authDto: AuthDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    // Get refresh token from cookies
+  async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies.refresh_token;
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token found');
     }
 
-    const tokens = await this.authService.refresh(refreshToken, authDto);
+    const tokens = await this.authService.refresh(refreshToken);
 
-    const maxAge = authDto.rememberMe
-      ? 7 * 24 * 60 * 60 * 1000
-      : 15 * 60 * 1000;
+    const maxAge = 7 * 24 * 60 * 60 * 1000;
 
     res.cookie('access_token', tokens.data.access_token, {
       httpOnly: true,
@@ -127,6 +115,24 @@ export class AuthController {
   @Post('logout')
   logout(@Req() req) {
     return this.authService.logOut(req);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('check-token')
+  async checkToken(@Req() req) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      throw new UnauthorizedException('No token provided');
+    }
+    const tokenInfo = await this.authService.checkTokenExpiration(token);
+
+    return {
+      data: {
+        ...tokenInfo,
+        token: token.substring(0, 20) + '...', // Show first 20 chars of token
+        currentTime: new Date().toISOString(),
+        tokenType: 'access_token',
+      },
+    };
   }
   // @Post('logout')
   // @UseGuards(JwtAuthGuard)

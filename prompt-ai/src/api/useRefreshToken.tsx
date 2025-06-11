@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { toast } from "sonner";
+import api from "./axios";
 
 interface RefreshTokenResponse {
   data: {
@@ -11,8 +11,8 @@ interface RefreshTokenResponse {
 
 const refreshToken = async () => {
   try {
-    const response = await axios.post<RefreshTokenResponse>(
-      `http://localhost:3001/auth/refresh`,
+    const response = await api.post<RefreshTokenResponse>(
+      `/auth/refresh`,
       {},
       {
         withCredentials: true,

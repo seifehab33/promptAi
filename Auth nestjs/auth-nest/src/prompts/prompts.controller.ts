@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PromptsService } from './prompts.service';
 import { PromptDto } from './dto/prompt.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -19,8 +29,23 @@ export class PromptsController {
     return this.promptsService.getPrompts();
   }
 
+  @Get('search')
+  searchPrompts(@Query('query') query: string) {
+    return this.promptsService.getPromptByQuery(query);
+  }
+
   @Get(':id')
   getPromptById(@Param('id') id: number) {
     return this.promptsService.getPromptById(id);
+  }
+
+  @Patch(':id')
+  updatePrompt(@Param('id') id: number, @Body() dto: PromptDto) {
+    return this.promptsService.updatePrompt(id, dto);
+  }
+
+  @Delete(':id')
+  deletePrompt(@Param('id') id: number) {
+    return this.promptsService.deletePrompt(id);
   }
 }

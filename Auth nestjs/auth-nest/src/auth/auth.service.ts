@@ -29,7 +29,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private async generateTokens(user: User, dto: AuthDto) {
+  private async generateTokens(user: User) {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -39,9 +39,7 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, { expiresIn: '15m' }),
-      this.jwtService.signAsync(payload, {
-        expiresIn: dto.rememberMe ? '7d' : '15m',
-      }),
+      this.jwtService.signAsync(payload, { expiresIn: '7d' }),
     ]);
 
     // Save refresh token
@@ -72,17 +70,17 @@ export class AuthService {
       throw new BadRequestException('Invalid email or password');
     }
 
-    const tokens = await this.generateTokens(user, dto);
+    const tokens = await this.generateTokens(user);
 
     return {
       data: tokens,
     };
   }
 
-  async refresh(refreshToken: string, dto: AuthDto) {
+  async refresh(refreshToken: string) {
     try {
       // Verify the refresh token
-      const payload = await this.jwtService.verifyAsync(refreshToken);
+      await this.jwtService.verifyAsync(refreshToken);
 
       // Check if token exists in database
       const tokenRecord = await this.refreshTokenRepo.findOne({
@@ -95,7 +93,7 @@ export class AuthService {
       }
 
       // Generate new tokens
-      const tokens = await this.generateTokens(tokenRecord.user, dto);
+      const tokens = await this.generateTokens(tokenRecord.user);
 
       // Delete old refresh token
       await this.refreshTokenRepo.delete({ token: refreshToken });
@@ -122,7 +120,7 @@ export class AuthService {
         password: resultPassword,
       };
       const user = await this.userService.create(payload);
-      const tokens = await this.generateTokens(user, authDto);
+      const tokens = await this.generateTokens(user);
 
       return {
         data: {
@@ -214,4 +212,22 @@ export class AuthService {
   //     throw new UnauthorizedException('Invalid or expired token');
   //   }
   // }
+
+  async checkTokenExpiration(token: string) {
+    try {
+      const decoded = await this.jwtService.verifyAsync(token);
+      const expirationDate = new Date(decoded.exp * 1000); // Convert to milliseconds
+      const now = new Date();
+      const timeLeft = expirationDate.getTime() - now.getTime();
+      const minutesLeft = Math.floor(timeLeft / (1000 * 60));
+
+      return {
+        expiresAt: expirationDate,
+        timeLeft: minutesLeft,
+        isExpired: timeLeft <= 0,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 }

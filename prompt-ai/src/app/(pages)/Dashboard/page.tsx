@@ -19,11 +19,15 @@ import useCreatePrompt from "@/api/useCreatePrompt";
 import useSavePrompt from "@/api/useSavePrompt";
 import PromptLibrary from "@/components/PromptLibrary/PromptLibrary";
 import { Skeleton } from "@/components/ui/skeleton";
+import useDebounce from "@/hooks/useDebounce";
 
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
+  const [promptTitle, setPromptTitle] = useState("");
   const [context, setContext] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const router = useRouter();
   const {
     generatePrompt,
@@ -52,8 +56,14 @@ const Dashboard = () => {
       toast.error("Please generate a response before saving");
       return;
     }
+
+    if (!promptTitle.trim()) {
+      toast.error("Please enter a prompt title");
+      return;
+    }
+
     savePrompt({
-      promptTitle: prompt || "Untitled Prompt",
+      promptTitle: promptTitle,
       promptDescription:
         currentResponse || responses[responses.length - 1].text,
       promptContext: context,
@@ -61,6 +71,7 @@ const Dashboard = () => {
       isPublic: false,
     });
     setContext("");
+    setPromptTitle("");
   };
 
   const handleGenerateResponse = () => {
@@ -69,10 +80,11 @@ const Dashboard = () => {
       return;
     }
 
-    // Combine prompt and context if context is provided
-    const fullPrompt = context ? `${prompt}\n\nContext: ${context}` : prompt;
+    generatePrompt({
+      prompt: prompt,
+      context: context || undefined,
+    });
 
-    generatePrompt({ prompt: fullPrompt });
     toast.info(
       "Click on Save Your Prompt to save your prompt and call it later",
       {
@@ -81,7 +93,6 @@ const Dashboard = () => {
     );
     setPrompt("");
   };
-
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white dark:bg-promptsmith-dark border-b border-border py-4">
@@ -127,6 +138,17 @@ const Dashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div>
+                      <div className="space-y-2">
+                        <label className="font-medium">Prompt Title</label>
+                        <Input
+                          placeholder="Enter your prompt title here..."
+                          className="w-full"
+                          value={promptTitle}
+                          onChange={(e) => setPromptTitle(e.target.value)}
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <label className="font-medium">Prompt</label>
                       <Textarea
@@ -282,13 +304,12 @@ const Dashboard = () => {
                   <Input
                     placeholder="Search your prompts..."
                     className="max-w-md"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
-                  <Button variant="outline" className="ml-2">
-                    Search
-                  </Button>
                 </div>
 
-                <PromptLibrary />
+                <PromptLibrary search={debouncedSearch} />
               </CardContent>
             </Card>
           </TabsContent>
