@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { useEffect, useState } from "react";
 import useResetPassword from "@/api/useResetPassword";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import useValidateTokenForgetPass from "@/api/useValidateTokenForgetPass";
 
@@ -25,12 +25,20 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const { ReqResetPassword, isPending } = useResetPassword();
   const { isLoading, error } = useValidateTokenForgetPass(token);
+  const router = useRouter();
 
   useEffect(() => {
+    if (!token) {
+      toast.error("No reset token found");
+      router.replace("/forget-password");
+      return;
+    }
+
     if (error) {
       toast.error("Invalid or expired reset token");
+      router.replace("/forget-password");
     }
-  }, [error]);
+  }, [error, router, token]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
