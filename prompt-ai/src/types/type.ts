@@ -32,3 +32,12 @@ export interface Prompt {
   updatedAt: Date;
 }
 export type PromptUpdate = Partial<Prompt>;
+export interface ForgetPassResponse {
+  data: {
+    message: string;
+  };
+}
+export interface ResetPasswordData {
+  token: string;
+  newPassword: string;
+}

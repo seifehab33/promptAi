@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import useDeletePrompt from "@/api/useDeletePrompt";
+import { useRouter } from "next/navigation";
 
 function PromptLibrary({ search }: { search: string }) {
   const {
@@ -25,7 +26,7 @@ function PromptLibrary({ search }: { search: string }) {
     error: filterError,
   } = useFilterPrompt(search);
   const { DeletePrompt, isPending } = useDeletePrompt();
-
+  const router = useRouter();
   const isLoading = isLoadingPrompts || isLoadingFilter;
   const error = promptsError || filterError;
   const displayPrompts = search ? FilteredData || [] : Prompts || [];
@@ -90,7 +91,11 @@ function PromptLibrary({ search }: { search: string }) {
                 </div>
               )}
               <div className="flex justify-end gap-2 mt-4">
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(`/editor/advanced/${prompt.id}`)}
+                >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>

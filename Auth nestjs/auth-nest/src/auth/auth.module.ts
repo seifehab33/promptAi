@@ -9,6 +9,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { BlacklistedTokenModule } from 'src/blacklisted-token/blacklisted-token.module';
 import { BlacklistedToken } from 'src/blacklisted-token/entities/blacklisted-token.entity';
+import { ResetPasswordsEnitity } from './entities/reset-passwords.entity';
+import { EmailService } from './email.service';
 
 @Module({
   imports: [
@@ -19,10 +21,14 @@ import { BlacklistedToken } from 'src/blacklisted-token/entities/blacklisted-tok
       secret: 'ssssss$%$#',
       signOptions: { expiresIn: '1h' },
     }),
-    TypeOrmModule.forFeature([RefreshToken, BlacklistedToken]),
+    TypeOrmModule.forFeature([
+      RefreshToken,
+      BlacklistedToken,
+      ResetPasswordsEnitity,
+    ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, EmailService],
   exports: [AuthService, JwtAuthGuard],
 })
 export class AuthModule {}

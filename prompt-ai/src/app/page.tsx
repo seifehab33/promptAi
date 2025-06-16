@@ -26,7 +26,7 @@ const Index = () => {
               full potential of AI.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
-              <Link href="/signup">
+              <Link href="/SignUp">
                 <Button size="lg" className="w-full sm:w-auto">
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

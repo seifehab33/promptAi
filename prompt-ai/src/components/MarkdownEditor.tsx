@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import ReactMarkdown from "react-markdown";
-
+import remarkGfm from "remark-gfm";
 interface MarkdownEditorProps {
   content: string;
   onChange: (value: string) => void;
@@ -37,7 +37,7 @@ const MarkdownEditor = ({ content, onChange }: MarkdownEditorProps) => {
           className="p-4 min-h-[200px] prose prose-sm dark:prose-invert max-w-none"
         >
           {content ? (
-            <ReactMarkdown>{content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           ) : (
             <p className="text-muted-foreground italic">
               Preview will appear here

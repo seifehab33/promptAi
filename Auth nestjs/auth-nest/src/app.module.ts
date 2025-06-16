@@ -11,8 +11,15 @@ import { LoggerMiddleware } from './logger.middleware';
 import { BlacklistedTokenModule } from './blacklisted-token/blacklisted-token.module';
 import { BlacklistedToken } from './blacklisted-token/entities/blacklisted-token.entity';
 import { PromptsModule } from './prompts/prompts.module';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
+
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
     TypeOrmModule.forRoot({
       database: 'db.sqlite',
       type: 'sqlite',

@@ -11,10 +11,12 @@ import { CreateUserDto } from 'src/user/dto/user.dto';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from 'src/user/entities/user.entity';
 import { BlacklistedToken } from 'src/blacklisted-token/entities/blacklisted-token.entity';
+import { EmailService } from './email.service';
+import { ResetPasswordsEnitity } from './entities/reset-passwords.entity';
 
 const scrypt = promisify(_scrypt);
 
@@ -27,6 +29,9 @@ export class AuthService {
     @InjectRepository(BlacklistedToken)
     private readonly blacklistedTokenRepo: Repository<BlacklistedToken>,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+    @InjectRepository(ResetPasswordsEnitity)
+    private readonly resetPasswordRepo: Repository<ResetPasswordsEnitity>,
   ) {}
 
   private async generateTokens(user: User) {
@@ -110,7 +115,10 @@ export class AuthService {
     try {
       const userEmail = await this.userService.findByEmail(dto.email);
       if (userEmail) {
-        throw new BadRequestException('User already exists');
+        throw new BadRequestException({
+          message: 'User with this email already exists',
+          statusCode: 400,
+        });
       }
       const salt = randomBytes(8).toString('hex');
       const hash = (await scrypt(dto.password, salt, 32)) as Buffer;
@@ -132,9 +140,10 @@ export class AuthService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'An error occurred during registration',
-      );
+      throw new InternalServerErrorException({
+        message: 'An error occurred during registration',
+        statusCode: 500,
+      });
     }
   }
   async logOut(req: any) {
@@ -175,44 +184,61 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
   }
-  // async logout(req: any) {
-  //   try {
-  //     const authHeader = req.headers.authorization;
-  //     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-  //       throw new UnauthorizedException('Invalid token');
-  //     }
+  async requestPasswordReset(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User with this email didnt exist');
+    }
+    const resetToken = randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+    const resetPassword = this.resetPasswordRepo.create({
+      email,
+      token: resetToken,
+      expiresAt,
+    });
+    await this.resetPasswordRepo.save(resetPassword);
+    await this.emailService.sendPasswordResetEmail(email, resetToken);
+    return {
+      data: {
+        message: 'Password reset email sent successfully',
+      },
+    };
+  }
+  async resetPassword(token: string, newPassword: string) {
+    const resetPassword = await this.resetPasswordRepo.findOne({
+      where: { token, expiresAt: MoreThan(new Date()) },
+    });
+    if (!resetPassword) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+    const user = await this.userService.findByEmail(resetPassword.email);
+    if (!user) {
+      throw new BadRequestException('User with this email didnt exist');
+    }
+    const salt = randomBytes(8).toString('hex');
+    const hash = (await scrypt(newPassword, salt, 32)) as Buffer;
+    const resultPassword = salt + '.' + hash.toString('hex');
+    user.password = resultPassword;
+    await this.userService.update(user.id, user);
+    await this.resetPasswordRepo.update(resetPassword.id, { isUsed: true });
+    return {
+      data: {
+        message: 'Password reset successfully',
+      },
+    };
+  }
+  async validateResetToken(token: string) {
+    const passwordReset = await this.resetPasswordRepo.findOne({
+      where: {
+        token,
+        isUsed: false,
+        expiresAt: MoreThan(new Date()),
+      },
+    });
 
-  //     const token = authHeader.split(' ')[1];
-  //     const decoded = this.jwtService.decode(token);
-
-  //     if (!decoded || !decoded['exp']) {
-  //       throw new UnauthorizedException('Invalid token format');
-  //     }
-
-  //     const expiresAt = decoded['exp'] * 1000; // Convert to milliseconds
-  //     const ttl = Math.max(0, expiresAt - Date.now()); // Ensure TTL is not negative
-
-  //     if (ttl > 0) {
-  //       await this.redis.setex(
-  //         `blacklist:${token}`,
-  //         Math.ceil(ttl / 1000),
-  //         'true',
-  //       );
-  //     }
-
-  //     return {
-  //       data: {
-  //         message: 'Logout successful',
-  //       },
-  //     };
-  //   } catch (error) {
-  //     if (error instanceof UnauthorizedException) {
-  //       throw error;
-  //     }
-  //     throw new UnauthorizedException('Invalid or expired token');
-  //   }
-  // }
-
+    return { valid: !!passwordReset };
+  }
   async checkTokenExpiration(token: string) {
     try {
       const decoded = await this.jwtService.verifyAsync(token);

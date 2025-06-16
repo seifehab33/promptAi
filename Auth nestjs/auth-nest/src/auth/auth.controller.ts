@@ -9,6 +9,7 @@ import {
   Get,
   Res,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
@@ -133,6 +134,18 @@ export class AuthController {
         tokenType: 'access_token',
       },
     };
+  }
+  @Post('forget-password')
+  async forgetPassword(@Body() dto: { email: string }) {
+    return this.authService.requestPasswordReset(dto.email);
+  }
+  @Post('reset-password')
+  async resetPassword(@Body() dto: { token: string; newPassword: string }) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
+  }
+  @Get('validate-reset-token')
+  async validateResetToken(@Query('token') token: string) {
+    return this.authService.validateResetToken(token);
   }
   // @Post('logout')
   // @UseGuards(JwtAuthGuard)

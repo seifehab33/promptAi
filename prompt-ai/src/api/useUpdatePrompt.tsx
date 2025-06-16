@@ -7,7 +7,7 @@ function useUpdatePrompt() {
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: ({ id, data }: { id: string; data: PromptUpdate }) =>
-      api.put(`/prompts/${id}`, data),
+      api.patch(`/prompts/${id}`, data),
     onSuccess: () => {
       toast.success("Prompt updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
@@ -16,7 +16,7 @@ function useUpdatePrompt() {
       toast.error(`Error updating prompt: ${error.message}`);
     },
   });
-  return { mutate, isPending };
+  return { updatePrompt: mutate, isPending };
 }
 
 export default useUpdatePrompt;

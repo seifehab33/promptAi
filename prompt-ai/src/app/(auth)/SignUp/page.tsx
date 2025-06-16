@@ -190,14 +190,14 @@ const SignUp = () => {
                 >
                   I agree to the{" "}
                   <Link
-                    href="/terms"
+                    href=""
                     className="text-promptsmith-purple hover:underline"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
-                    href="/privacy"
+                    href=""
                     className="text-promptsmith-purple hover:underline"
                   >
                     Privacy Policy
@@ -218,7 +218,7 @@ const SignUp = () => {
               <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link
-                  href="/signin"
+                  href="/SignIn"
                   className="text-promptsmith-purple hover:underline"
                 >
                   Sign in

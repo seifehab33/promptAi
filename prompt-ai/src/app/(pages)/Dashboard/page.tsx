@@ -12,7 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Copy, Check } from "lucide-react";
+import { Plus, Copy, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import useCreatePrompt from "@/api/useCreatePrompt";
@@ -35,9 +35,8 @@ const Dashboard = () => {
     currentResponse,
     isStreaming,
     stopGeneration,
-    clearText,
   } = useCreatePrompt();
-  const { savePrompt } = useSavePrompt();
+  const { savePrompt, data: savedPrompt } = useSavePrompt();
 
   const handleCopy = async (text: string, id: string) => {
     try {
@@ -195,15 +194,6 @@ const Dashboard = () => {
                         >
                           Save Your Prompt
                         </button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={clearText}
-                          className="text-red-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed "
-                          disabled={currentResponse ? false : true}
-                        >
-                          <Trash2 className="h-4 w-4 disabled:opacity-50 disabled:cursor-not-allowed" />
-                        </Button>
                       </div>
                     </CardDescription>
                   </CardHeader>
@@ -280,8 +270,10 @@ const Dashboard = () => {
                     <Button
                       variant="outline"
                       className="w-full"
-                      disabled={!responses.length && !currentResponse}
-                      onClick={() => router.push("/editor")}
+                      disabled={!savedPrompt}
+                      onClick={() =>
+                        router.push(`/editor/advanced/${savedPrompt.id}`)
+                      }
                     >
                       Edit in Advanced Editor
                     </Button>

@@ -75,7 +75,7 @@ const SignIn = () => {
                 <div className="flex justify-between items-center">
                   <Label htmlFor="password">Password</Label>
                   <Link
-                    href="/forgot-password"
+                    href="/forget-password"
                     className="text-sm text-promptsmith-purple hover:underline"
                   >
                     Forgot password?
@@ -121,7 +121,7 @@ const SignIn = () => {
               <p className="text-center text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}
                 <Link
-                  href="/signup"
+                  href="/SignUp"
                   className="text-promptsmith-purple hover:underline"
                 >
                   Sign up
