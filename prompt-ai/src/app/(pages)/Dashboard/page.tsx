@@ -20,7 +20,14 @@ import useSavePrompt from "@/api/useSavePrompt";
 import PromptLibrary from "@/components/PromptLibrary/PromptLibrary";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDebounce from "@/hooks/useDebounce";
-
+import responseai from "@/assets/images/response ai.svg";
+import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
   const [promptTitle, setPromptTitle] = useState("");
@@ -37,7 +44,7 @@ const Dashboard = () => {
     stopGeneration,
   } = useCreatePrompt();
   const { savePrompt, data: savedPrompt } = useSavePrompt();
-
+  const [isPublic, setIsPublic] = useState(false);
   const handleCopy = async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -67,10 +74,11 @@ const Dashboard = () => {
         currentResponse || responses[responses.length - 1].text,
       promptContext: context,
       promptTags: [],
-      isPublic: false,
+      isPublic: isPublic || false,
     });
     setContext("");
     setPromptTitle("");
+    setIsPublic(false);
   };
 
   const handleGenerateResponse = () => {
@@ -91,6 +99,36 @@ const Dashboard = () => {
       }
     );
     setPrompt("");
+  };
+  const handleSharePrompt = () => {
+    if (!responses.length && !currentResponse) {
+      toast.error("Please generate a response before sharing");
+      return;
+    }
+    setIsPublic(!isPublic);
+    toast.success(
+      "Prompt shared successfully , Please Click on Save Your Prompt to save your prompt and call it later",
+      {
+        duration: 5000,
+        style: {
+          backgroundColor: "green",
+          color: "white",
+        },
+      }
+    );
+  };
+  const handleBackToPrivate = () => {
+    setIsPublic(false);
+    toast.success(
+      "Prompt back to private successfully , Please Click on Save Your Prompt to save your prompt and call it later",
+      {
+        duration: 5000,
+        style: {
+          backgroundColor: "green",
+          color: "white",
+        },
+      }
+    );
   };
   return (
     <div className="min-h-screen bg-background">
@@ -129,12 +167,14 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <Card className="h-full flex flex-col ">
-                  <CardHeader>
-                    <CardTitle>Craft Your Prompt</CardTitle>
-                    <CardDescription>
-                      Write your prompt and provide context to get the best
-                      results
-                    </CardDescription>
+                  <CardHeader className="flex justify-between  flex-row gap-4">
+                    <div>
+                      <CardTitle>Craft Your Prompt</CardTitle>
+                      <CardDescription>
+                        Write your prompt and provide context to get the best
+                        results
+                      </CardDescription>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
@@ -183,17 +223,76 @@ const Dashboard = () => {
               <div>
                 <Card className="h-full">
                   <CardHeader>
-                    <CardTitle>AI Response</CardTitle>
+                    <CardTitle>
+                      AI Response{" "}
+                      <Badge
+                        className={`${
+                          isPublic
+                            ? "bg-prompt-gradient text-clip"
+                            : "bg-gray-800"
+                        }`}
+                      >
+                        {isPublic ? "Public" : "Private"}
+                      </Badge>
+                    </CardTitle>
                     <CardDescription className="flex items-center justify-between">
                       See how the AI responds to your prompt
                       <div className="flex gap-2">
-                        <button
-                          className="text-sm bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed   px-2 py-1 rounded-md text-muted-foreground"
+                        <Button
+                          className="text-sm bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed   px-2 py-1 rounded-md "
                           onClick={handelSavePrompt}
                           disabled={currentResponse ? false : true}
                         >
                           Save Your Prompt
-                        </button>
+                        </Button>
+                        <div className="w-fit flex items-center gap-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed bg-black text-white  hover:text-white">
+                          {!isPublic && (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="size-5 ml-2"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
+                              />
+                            </svg>
+                          )}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className={`text-sm text-white `}>
+                                {isPublic ? (
+                                  <Button
+                                    className="bg-black text-white hover:bg-black/80 hover:text-white disabled:opacity-50  disabled:cursor-not-allowed"
+                                    onClick={handleBackToPrivate}
+                                  >
+                                    Back to Private
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    className="bg-black text-white disabled:opacity-50  disabled:cursor-not-allowed hover:bg-black/80 hover:text-white"
+                                    onClick={handleSharePrompt}
+                                  >
+                                    Share to Public Community
+                                  </Button>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="bottom"
+                              className="bg-black text-white"
+                            >
+                              <p className="text-sm">
+                                Share your prompt with the public community by
+                                default its private.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
                       </div>
                     </CardDescription>
                   </CardHeader>
@@ -207,8 +306,17 @@ const Dashboard = () => {
                                 <p className="text-sm text-muted-foreground mb-2">
                                   Prompt: {response.prompt}
                                 </p>
-                                <p className="whitespace-pre-line">
-                                  {response.text}
+                                <p className="whitespace-pre-line flex ">
+                                  <span className="w-12">
+                                    <Image
+                                      src={responseai}
+                                      alt="response ai"
+                                      className="  mr-2"
+                                    />
+                                  </span>
+                                  <span className="text-sm">
+                                    {response.text}
+                                  </span>
                                 </p>
                               </div>
                               <Button

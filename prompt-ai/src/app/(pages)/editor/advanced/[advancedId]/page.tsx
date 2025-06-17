@@ -75,8 +75,8 @@ function Page({ params }: { params: Promise<{ advancedId: string }> }) {
     <Dialog open onOpenChange={handleClose}>
       <DialogContent className="max-w-[95vw] w-full h-screen p-0 gap-0 overflow-y-auto">
         <div className="flex flex-col h-full">
-          <DialogHeader className="flex flex-row items-center justify-between p-6 border-b">
-            <DialogTitle className="text-xl font-semibold">
+          <DialogHeader className="flex flex-col p-6 border-b">
+            <DialogTitle className="text-xl font-semibold text-clip gradient-text">
               Advanced Editor
             </DialogTitle>
             <DialogDescription>

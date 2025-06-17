@@ -11,6 +11,7 @@ function useFilterPrompt(query: string) {
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    enabled: !!query,
   });
   return { FilteredData: data, isLoading, error };
 }
