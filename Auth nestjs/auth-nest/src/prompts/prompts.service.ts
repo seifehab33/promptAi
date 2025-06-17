@@ -24,44 +24,93 @@ export class PromptsService {
     return this.promptRepo.save(prompt);
   }
 
-  async getPrompts() {
-    return this.promptRepo.find();
+  async getPrompts(userId: number) {
+    return this.promptRepo.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
   }
+  async getPublicPrompts(page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
 
+    const [prompts, total] = await this.promptRepo.findAndCount({
+      where: { isPublic: true },
+      select: {
+        id: true,
+        promptTitle: true,
+        promptDescription: true,
+        promptTags: true,
+        promptContext: true,
+        user: { email: true },
+      },
+      relations: {
+        user: true,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data: prompts,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
   async getPromptById(id: number) {
     return this.promptRepo.findOneBy({ id });
   }
-  async getPromptByQuery(query: string) {
+
+  async getPromptByQuery(query: string, userId: number) {
     if (!query) {
-      return this.promptRepo.find();
+      return this.promptRepo.find({
+        where: { user: { id: userId } },
+        relations: ['user'],
+      });
     }
 
     const searchQuery = query.toLowerCase();
 
     return this.promptRepo
       .createQueryBuilder('prompt')
-      .where('LOWER(prompt.promptTitle) LIKE :search', {
-        search: `%${searchQuery}%`,
-      })
-      .orWhere('LOWER(prompt.promptDescription) LIKE :search', {
-        search: `%${searchQuery}%`,
-      })
-      .orWhere('LOWER(prompt.promptContext) LIKE :search', {
-        search: `%${searchQuery}%`,
-      })
-      .orWhere('LOWER(prompt.promptTags) LIKE :search', {
-        search: `%${searchQuery}%`,
-      })
+      .leftJoinAndSelect('prompt.user', 'user')
+      .where('user.id = :userId', { userId })
+      .andWhere(
+        '(LOWER(prompt.promptTitle) LIKE :search OR LOWER(prompt.promptDescription) LIKE :search OR LOWER(prompt.promptContext) LIKE :search OR LOWER(prompt.promptTags) LIKE :search)',
+        { search: `%${searchQuery}%` },
+      )
       .getMany();
   }
-  async updatePrompt(id: number, dto: PromptDto) {
-    const prompt = await this.promptRepo.findOneBy({ id });
+
+  async updatePrompt(id: number, dto: PromptDto, userId: number) {
+    const prompt = await this.promptRepo.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['user'],
+    });
+
     if (!prompt) {
       throw new NotFoundException('Prompt not found');
     }
+
     return this.promptRepo.update(id, dto);
   }
-  async deletePrompt(id: number) {
+
+  async deletePrompt(id: number, userId: number) {
+    const prompt = await this.promptRepo.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['user'],
+    });
+
+    if (!prompt) {
+      throw new NotFoundException('Prompt not found');
+    }
+
     return this.promptRepo.delete(id);
   }
 }

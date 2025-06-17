@@ -5,6 +5,7 @@ import { formatDate } from 'src/utils/format-date';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -31,6 +32,7 @@ export class PromptEntity {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   @Transform(({ value }) => formatDate(value))
   last_access: Date;
+  @Index()
   @Column({ default: false })
   isPublic: boolean;
   @ManyToOne(() => User, (user) => user.prompts)

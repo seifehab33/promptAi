@@ -25,13 +25,21 @@ export class PromptsController {
   }
 
   @Get()
-  getPrompts() {
-    return this.promptsService.getPrompts();
+  getPrompts(@GetUser() user: any) {
+    return this.promptsService.getPrompts(user.userId);
+  }
+
+  @Get('public')
+  getPublicPrompts(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.promptsService.getPublicPrompts(page, limit);
   }
 
   @Get('search')
-  searchPrompts(@Query('query') query: string) {
-    return this.promptsService.getPromptByQuery(query);
+  searchPrompts(@Query('query') query: string, @GetUser() user: any) {
+    return this.promptsService.getPromptByQuery(query, user.userId);
   }
 
   @Get(':id')
@@ -40,12 +48,16 @@ export class PromptsController {
   }
 
   @Patch(':id')
-  updatePrompt(@Param('id') id: number, @Body() dto: PromptDto) {
-    return this.promptsService.updatePrompt(id, dto);
+  updatePrompt(
+    @Param('id') id: number,
+    @Body() dto: PromptDto,
+    @GetUser() user: any,
+  ) {
+    return this.promptsService.updatePrompt(id, dto, user.userId);
   }
 
   @Delete(':id')
-  deletePrompt(@Param('id') id: number) {
-    return this.promptsService.deletePrompt(id);
+  deletePrompt(@Param('id') id: number, @GetUser() user: any) {
+    return this.promptsService.deletePrompt(id, user.userId);
   }
 }
