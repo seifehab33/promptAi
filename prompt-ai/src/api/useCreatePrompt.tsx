@@ -17,7 +17,6 @@ declare global {
 
 interface PromptGenerationParams {
   prompt: string;
-  model?: string;
   context?: string;
 }
 
@@ -28,31 +27,30 @@ interface Response {
   context?: string;
 }
 
-const generatePrompt = async ({
-  prompt,
-  model = "gpt-4",
-  context,
-}: PromptGenerationParams) => {
-  try {
-    const response = await window.puter.ai.chat(prompt, {
-      stream: true,
-      model,
-      context,
-    });
-    return response;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    }
-    throw new Error("Failed to generate prompt");
-  }
-};
-
-function useCreatePrompt() {
+function useCreatePrompt(model: string = "gpt-4") {
   const [responses, setResponses] = useState<Response[]>([]);
   const [currentResponse, setCurrentResponse] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const generatePrompt = async ({
+    prompt,
+    context,
+  }: PromptGenerationParams) => {
+    try {
+      const response = await window.puter.ai.chat(prompt, {
+        stream: true,
+        model,
+        context,
+      });
+      return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error("Failed to generate prompt");
+    }
+  };
 
   const { mutate, isPending } = useMutation({
     mutationFn: generatePrompt,

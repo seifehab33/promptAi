@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,16 +16,17 @@ import {
   Bookmark,
   BookmarkPlus,
   Star,
-  Copy,
+  // Copy,
   Download,
   Share,
   Save,
 } from "lucide-react";
 import { toast } from "sonner";
-import MarkdownEditor from "@/components/MarkdownEditor";
 import TagInput from "@/components/TagInput";
 import ComparisonView from "@/components/ComparisonView";
 import { useRouter } from "next/navigation";
+import TextPrompt from "./_textPrompt";
+import { Textarea } from "@/components/ui/textarea";
 const promptTypes = [
   { value: "chat", label: "Chat Prompt" },
   { value: "image", label: "Image Prompt" },
@@ -39,7 +40,6 @@ const PromptEditor = () => {
   const [promptContent, setPromptContent] = useState("");
   const [promptType, setPromptType] = useState("chat");
   const [tags, setTags] = useState<string[]>([]);
-  const [isMarkdownMode, setIsMarkdownMode] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
@@ -47,11 +47,14 @@ const PromptEditor = () => {
   const [responses, setResponses] = useState<string[]>([]);
   const router = useRouter();
 
+  // Predefined ratings to avoid hydration issues
+  const sampleRatings = [42, 78, 15];
+
   const handleGenerateResponse = async () => {
-    if (!promptContent.trim()) {
-      toast.error("Please enter a prompt before generating");
-      return;
-    }
+    // if (!promptContent.trim()) {
+    //    toast.error("Please enter a prompt before generating");
+    //   return;
+    // }
 
     setIsLoading(true);
 
@@ -94,11 +97,6 @@ const PromptEditor = () => {
   const handleSharePrompt = () => {
     // In a real app, this would generate a shareable link
     toast.success("A shareable link has been copied to your clipboard.");
-  };
-
-  const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(promptContent);
-    toast.success("The prompt has been copied to your clipboard.");
   };
 
   return (
@@ -186,58 +184,27 @@ const PromptEditor = () => {
                   </div>
 
                   <TagInput tags={tags} setTags={setTags} />
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={!isMarkdownMode ? "bg-muted" : ""}
-                          onClick={() => setIsMarkdownMode(false)}
-                        >
-                          Plain Text
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={isMarkdownMode ? "bg-muted" : ""}
-                          onClick={() => setIsMarkdownMode(true)}
-                        >
-                          Markdown
-                        </Button>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={handleCopyPrompt}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {isMarkdownMode ? (
-                      <MarkdownEditor
-                        content={promptContent}
-                        onChange={setPromptContent}
-                      />
-                    ) : (
+                  <div>
+                    <div className="space-y-2">
+                      <label className="font-medium">Prompt</label>
                       <Textarea
-                        placeholder="Write your prompt here..."
-                        className="min-h-[200px]"
+                        placeholder="Enter your prompt here..."
+                        className="min-h-32"
                         value={promptContent}
                         onChange={(e) => setPromptContent(e.target.value)}
                       />
-                    )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-end"></div>
+
+                    <TextPrompt prompt={promptContent} />
                   </div>
 
                   <div className="flex justify-between">
                     <Button
                       onClick={handleGenerateResponse}
-                      disabled={isLoading || !promptContent.trim()}
+                      disabled={isLoading}
                     >
                       {isLoading ? "Generating..." : "Generate Responses"}
                     </Button>
@@ -298,7 +265,7 @@ const PromptEditor = () => {
                         <span>chat, writing</span>
                         <span className="ml-auto flex items-center">
                           <Star className="h-3 w-3 mr-1" fill="currentColor" />
-                          {Math.floor(Math.random() * 100) + 5}
+                          {sampleRatings[item - 1]}
                         </span>
                       </div>
                     </Card>

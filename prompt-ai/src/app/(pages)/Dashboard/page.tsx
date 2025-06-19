@@ -21,6 +21,7 @@ import PromptLibrary from "@/components/PromptLibrary/PromptLibrary";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDebounce from "@/hooks/useDebounce";
 import responseai from "@/assets/images/response ai.svg";
+import publicommunity from "@/assets/images/publicommunity.svg";
 import Image from "next/image";
 import {
   Tooltip,
@@ -147,7 +148,15 @@ const Dashboard = () => {
               PromptSmith
             </span>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" className="bg-prompt-gradient text-white">
+              <Image
+                src={publicommunity}
+                alt="public community"
+                className="w-10 h-10  p-1"
+              />
+              <span className="text-sm">Public Community</span>
+            </Button>
             <Button
               variant="ghost"
               onClick={handleSignOut}
