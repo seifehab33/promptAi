@@ -148,14 +148,13 @@ export class AuthService {
   }
   async logOut(req: any) {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const token = req.cookies?.access_token;
+      if (!token) {
         throw new UnauthorizedException('No token provided');
       }
-      const token = authHeader.split(' ')[1];
       let decodedToken;
       try {
-        decodedToken = this.jwtService.verifyAsync(token);
+        decodedToken = await this.jwtService.verifyAsync(token);
       } catch (error) {
         throw new UnauthorizedException('Invalid token');
       }

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Loader2 } from "lucide-react";
+import { Edit, Trash2, Loader2, Tag } from "lucide-react";
 import useDeletePrompt from "@/api/useDeletePrompt";
 import { useRouter } from "next/navigation";
 
@@ -94,9 +94,10 @@ function PromptLibrary({ search }: { search: string }) {
                     {prompt.promptTags.map((tag: string, index: number) => (
                       <span
                         key={index}
-                        className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs"
+                        className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs flex items-center gap-1"
                       >
-                        {tag}
+                        <Tag className="h-4 w-4" />
+                        <span className="text-xs">{tag}</span>
                       </span>
                     ))}
                   </div>

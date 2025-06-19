@@ -28,6 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import useLogout from "@/api/useLogout";
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
   const [promptTitle, setPromptTitle] = useState("");
@@ -36,6 +37,7 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const router = useRouter();
+  const { logout, isPending } = useLogout();
   const {
     generatePrompt,
     responses,
@@ -130,6 +132,9 @@ const Dashboard = () => {
       }
     );
   };
+  const handleSignOut = () => {
+    logout();
+  };
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white dark:bg-promptsmith-dark border-b border-border py-4">
@@ -142,9 +147,15 @@ const Dashboard = () => {
               PromptSmith
             </span>
           </div>
-          <Button variant="ghost" onClick={() => (window.location.href = "/")}>
-            Sign Out
-          </Button>
+          <div>
+            <Button
+              variant="ghost"
+              onClick={handleSignOut}
+              disabled={isPending}
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
