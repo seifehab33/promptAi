@@ -4,6 +4,7 @@ import { Copy, Check } from "lucide-react";
 import useCreatePrompt from "@/api/useCreatePrompt";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import FullScreen from "@/components/Dialogs/FullScreen";
 
 interface PromptProps {
   prompt: string;
@@ -217,7 +218,10 @@ function TextPrompt({ prompt }: PromptProps) {
           className="w-full h-full p-4 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600"
         >
           <div className="text-white text-lg font-bold flex items-center justify-between mb-3">
-            {type.name}
+            <div className="flex items-center gap-2 justify-between w-full">
+              {type.name}
+              <FullScreen prompt={prompt} promptTitle={type.name} />
+            </div>
           </div>
           <hr className="border-gray-500 my-3" />
 

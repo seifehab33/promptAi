@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PromptEntity } from './entity/prompt.entity';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PromptDto } from './dto/prompt.dto';
 
 @Injectable()

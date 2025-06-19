@@ -23,16 +23,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import TagInput from "@/components/TagInput";
-import ComparisonView from "@/components/ComparisonView";
+// import ComparisonView from "@/components/ComparisonView";
 import { useRouter } from "next/navigation";
 import TextPrompt from "./_textPrompt";
 import { Textarea } from "@/components/ui/textarea";
+import ImagePrompt from "./_imagePrompt";
 const promptTypes = [
   { value: "chat", label: "Chat Prompt" },
   { value: "image", label: "Image Prompt" },
   { value: "code", label: "Code Prompt" },
-  { value: "writing", label: "Writing Prompt" },
-  { value: "other", label: "Other" },
+  // { value: "writing", label: "Writing Prompt" },
+  // { value: "other", label: "Other" },
 ];
 
 const PromptEditor = () => {
@@ -43,41 +44,12 @@ const PromptEditor = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [responses, setResponses] = useState<string[]>([]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [responses, setResponses] = useState<string[]>([]);
   const router = useRouter();
 
   // Predefined ratings to avoid hydration issues
   const sampleRatings = [42, 78, 15];
-
-  const handleGenerateResponse = async () => {
-    // if (!promptContent.trim()) {
-    //    toast.error("Please enter a prompt before generating");
-    //   return;
-    // }
-
-    setIsLoading(true);
-
-    try {
-      // Simulate multiple API calls with setTimeout
-      const mockResponses = [
-        "This is the first response to your prompt. In a real application, this would come from an AI API like OpenAI's GPT, Anthropic's Claude, or similar services.",
-        "This is the second response with slightly different parameters. Notice how changing parameters can affect the output quality and style.",
-        "This is the third response from a different model. Different AI models may have different strengths and weaknesses for various types of prompts.",
-      ];
-
-      setTimeout(() => {
-        setResponses(mockResponses);
-
-        toast.success("Multiple responses have been generated for comparison.");
-
-        setIsLoading(false);
-      }, 1500);
-    } catch (error) {
-      toast.error(`Failed to generate responses. Please try again. ${error}`);
-      setIsLoading(false);
-    }
-  };
 
   const handleSavePrompt = () => {
     // In a real app, this would save to a database
@@ -195,19 +167,25 @@ const PromptEditor = () => {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-end"></div>
+                  {promptType === "chat" || promptType === "code" ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-end"></div>
 
-                    <TextPrompt prompt={promptContent} />
-                  </div>
+                      <TextPrompt prompt={promptContent} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-end w-full">
+                      <ImagePrompt prompt={promptContent} />
+                    </div>
+                  )}
 
                   <div className="flex justify-between">
-                    <Button
+                    {/* <Button
                       onClick={handleGenerateResponse}
                       disabled={isLoading}
                     >
                       {isLoading ? "Generating..." : "Generate Responses"}
-                    </Button>
+                    </Button> */}
 
                     <div className="flex gap-2">
                       <Button variant="outline" onClick={handleSavePrompt}>
@@ -232,12 +210,12 @@ const PromptEditor = () => {
               </CardContent>
             </Card>
 
-            {responses.length > 0 && (
+            {/* {responses.length > 0 && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Response Comparison</h2>
-                <ComparisonView responses={responses} />
+                <ComparisonView responses={[]} />
               </div>
-            )}
+            )} */}
           </div>
 
           <div>
