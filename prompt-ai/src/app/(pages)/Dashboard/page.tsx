@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import useLogout from "@/api/useLogout";
+
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
   const [promptTitle, setPromptTitle] = useState("");

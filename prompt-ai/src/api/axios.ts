@@ -18,14 +18,18 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      console.log("🔄 Access token expired, attempting refresh...");
+
       try {
         // Call refresh token endpoint
         await api.post("/auth/refresh");
+        console.log("✅ Token refresh successful");
 
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // Redirect to login if refresh fails
+        // If refresh fails, redirect to login
+        console.log("❌ Token refresh failed, redirecting to login");
         window.location.href = "/SignIn";
         return Promise.reject(refreshError);
       }

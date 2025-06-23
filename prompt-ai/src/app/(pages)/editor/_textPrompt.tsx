@@ -5,9 +5,11 @@ import useCreatePrompt from "@/api/useCreatePrompt";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import FullScreen from "@/components/Dialogs/FullScreen";
+import { usePuterSDK } from "@/hooks/usePuterSDK";
 
 interface PromptProps {
   prompt: string;
+  pdfRef: React.RefObject<HTMLDivElement | null>;
 }
 
 interface Response {
@@ -17,10 +19,11 @@ interface Response {
   model: string;
 }
 
-function TextPrompt({ prompt }: PromptProps) {
+function TextPrompt({ prompt, pdfRef }: PromptProps) {
   const [responses, setResponses] = useState<{ [key: string]: Response[] }>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeModel, setActiveModel] = useState<string | null>(null);
+  const isSDKReady = usePuterSDK();
 
   // Memoize the typesPrompt array to prevent recreation on every render
   const typesPrompt = useMemo(
@@ -79,6 +82,14 @@ function TextPrompt({ prompt }: PromptProps) {
         return;
       }
 
+      // Check if Puter SDK is available
+      if (!isSDKReady) {
+        toast.error(
+          "AI service is not available. Please wait a moment and try again."
+        );
+        return;
+      }
+
       setActiveModel(modelName);
 
       // Get the appropriate hook based on model name
@@ -112,7 +123,7 @@ function TextPrompt({ prompt }: PromptProps) {
         }
       );
     },
-    [prompt, chatGptHook, claudeHook, deepSeekHook, grokHook]
+    [prompt, chatGptHook, claudeHook, deepSeekHook, grokHook, isSDKReady]
   );
 
   // Memoize the handleStopGeneration function
@@ -159,7 +170,7 @@ function TextPrompt({ prompt }: PromptProps) {
           [modelName]: [
             ...(prev[modelName] || []),
             {
-              id: Date.now().toString(),
+              id: `${modelName}-${prev[modelName]?.length || 0}`,
               prompt: prompt,
               text: hook.currentResponse,
               model: modelName,
@@ -235,7 +246,7 @@ function TextPrompt({ prompt }: PromptProps) {
                         Prompt: {response.prompt}
                       </p>
                       <p className="whitespace-pre-line flex">
-                        <span className="text-sm text-white">
+                        <span className="text-sm text-white" ref={pdfRef}>
                           {response.text}
                         </span>
                       </p>

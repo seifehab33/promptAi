@@ -17,7 +17,7 @@ function useSignInUser() {
     onSuccess: () => {
       toast.success("User signed in successfully!");
       setTimeout(() => {
-        router.push("/Dashboard");
+        router.push("/dashboard");
       }, 1500);
     },
     onError: (error: AxiosError<{ message: string }>) => {

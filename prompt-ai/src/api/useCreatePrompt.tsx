@@ -38,6 +38,13 @@ function useCreatePrompt(model: string = "gpt-4") {
     context,
   }: PromptGenerationParams) => {
     try {
+      // Check if Puter SDK is available
+      if (!window.puter || !window.puter.ai) {
+        throw new Error(
+          "Puter AI SDK is not available. Please make sure it's properly loaded."
+        );
+      }
+
       const response = await window.puter.ai.chat(prompt, {
         stream: true,
         model,

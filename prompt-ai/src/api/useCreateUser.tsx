@@ -21,7 +21,7 @@ function useCreateUser() {
         className: "bg-green-500 text-white",
       });
       setTimeout(() => {
-        router.push("/Dashboard");
+        router.push("/dashboard");
       }, 1900);
     },
     onError: (error: AxiosError<ErrorResponse>) => {

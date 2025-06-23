@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,12 +16,13 @@ import {
   BookmarkPlus,
   Star,
   // Copy,
-  Download,
+  // Download,
   Share,
   Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import TagInput from "@/components/TagInput";
+
 // import ComparisonView from "@/components/ComparisonView";
 import { useRouter } from "next/navigation";
 import TextPrompt from "./_textPrompt";
@@ -44,6 +44,7 @@ const PromptEditor = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const pdfRef = useRef<HTMLDivElement>(null);
   // const [isLoading, setIsLoading] = useState(false);
   // const [responses, setResponses] = useState<string[]>([]);
   const router = useRouter();
@@ -54,16 +55,6 @@ const PromptEditor = () => {
   const handleSavePrompt = () => {
     // In a real app, this would save to a database
     toast.success("Your prompt has been saved to your library.");
-  };
-
-  const handleExportAsPDF = () => {
-    // In a real app, this would generate a PDF
-    toast.success("Your prompt has been exported as a PDF file.");
-  };
-
-  const handleExportAsImage = () => {
-    // In a real app, this would capture the content as an image
-    toast.success("Your prompt has been exported as an image file.");
   };
 
   const handleSharePrompt = () => {
@@ -97,12 +88,14 @@ const PromptEditor = () => {
             <Card className="mb-6">
               <CardContent className="pt-6">
                 <div className="space-y-4">
-                  <Input
-                    placeholder="Prompt Title"
-                    value={promptTitle}
-                    onChange={(e) => setPromptTitle(e.target.value)}
-                    className="font-medium text-lg"
-                  />
+                  {(promptType === "chat" || promptType === "code") && (
+                    <Input
+                      placeholder="Prompt Title"
+                      value={promptTitle}
+                      onChange={(e) => setPromptTitle(e.target.value)}
+                      className="font-medium text-lg"
+                    />
+                  )}
 
                   <div className="flex items-center gap-4">
                     <div className="w-full max-w-xs">
@@ -155,56 +148,48 @@ const PromptEditor = () => {
                     </div>
                   </div>
 
-                  <TagInput tags={tags} setTags={setTags} />
+                  {promptType === "chat" ||
+                    (promptType === "code" && (
+                      <TagInput tags={tags} setTags={setTags} />
+                    ))}
                   <div>
-                    <div className="space-y-2">
-                      <label className="font-medium">Prompt</label>
-                      <Textarea
-                        placeholder="Enter your prompt here..."
-                        className="min-h-32"
-                        value={promptContent}
-                        onChange={(e) => setPromptContent(e.target.value)}
-                      />
-                    </div>
+                    {(promptType === "chat" || promptType === "code") && (
+                      <div className="space-y-2">
+                        <label className="font-medium">Prompt</label>
+                        <Textarea
+                          placeholder="Enter your prompt here..."
+                          className="min-h-32"
+                          value={promptContent}
+                          onChange={(e) => setPromptContent(e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
                   {promptType === "chat" || promptType === "code" ? (
                     <div className="space-y-2">
                       <div className="flex items-center justify-end"></div>
 
-                      <TextPrompt prompt={promptContent} />
+                      <TextPrompt prompt={promptContent} pdfRef={pdfRef} />
                     </div>
                   ) : (
                     <div className="flex items-center justify-end w-full">
-                      <ImagePrompt prompt={promptContent} />
+                      <ImagePrompt />
                     </div>
                   )}
 
                   <div className="flex justify-between">
-                    {/* <Button
-                      onClick={handleGenerateResponse}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Generating..." : "Generate Responses"}
-                    </Button> */}
-
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={handleSavePrompt}>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save to Library
-                      </Button>
-                      <Button variant="outline" onClick={handleExportAsPDF}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Export PDF
-                      </Button>
-                      <Button variant="outline" onClick={handleExportAsImage}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Export Image
-                      </Button>
-                      <Button variant="outline" onClick={handleSharePrompt}>
-                        <Share className="mr-2 h-4 w-4" />
-                        Share
-                      </Button>
-                    </div>
+                    {(promptType === "chat" || promptType === "code") && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={handleSavePrompt}>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save to Library
+                        </Button>
+                        <Button variant="outline" onClick={handleSharePrompt}>
+                          <Share className="mr-2 h-4 w-4" />
+                          Share To Community or Linkable
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -257,6 +242,47 @@ const PromptEditor = () => {
           </div>
         </div>
       </main>
+
+      {/* Hidden div for PDF export */}
+      <div ref={pdfRef} style={{ display: "none" }}>
+        <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+          <h1 style={{ fontSize: "24px", marginBottom: "20px", color: "#333" }}>
+            {promptTitle || "Prompt"}
+          </h1>
+
+          <div style={{ marginBottom: "15px" }}>
+            <strong>Type:</strong>{" "}
+            {promptTypes.find((t) => t.value === promptType)?.label ||
+              promptType}
+          </div>
+
+          {tags.length > 0 && (
+            <div style={{ marginBottom: "15px" }}>
+              <strong>Tags:</strong> {tags.join(", ")}
+            </div>
+          )}
+
+          <div style={{ marginBottom: "20px" }}>
+            <strong>Prompt Content:</strong>
+            <div
+              style={{
+                marginTop: "10px",
+                padding: "15px",
+                backgroundColor: "#f5f5f5",
+                borderRadius: "5px",
+                whiteSpace: "pre-wrap",
+                fontFamily: "monospace",
+              }}
+            >
+              {promptContent}
+            </div>
+          </div>
+
+          <div style={{ fontSize: "12px", color: "#666", marginTop: "30px" }}>
+            Exported from PromptSmith
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
