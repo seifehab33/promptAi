@@ -56,6 +56,16 @@ export class PromptsController {
     return this.promptsService.updatePrompt(id, dto, user.userId);
   }
 
+  @Post(':id/share')
+  sharePrompt(@Param('id') id: number, @GetUser() user: any) {
+    return this.promptsService.sharePrompt(id, user.userId);
+  }
+
+  @Post(':id/unshare')
+  unsharePrompt(@Param('id') id: number, @GetUser() user: any) {
+    return this.promptsService.unsharePrompt(id, user.userId);
+  }
+
   @Delete(':id')
   deletePrompt(@Param('id') id: number, @GetUser() user: any) {
     return this.promptsService.deletePrompt(id, user.userId);

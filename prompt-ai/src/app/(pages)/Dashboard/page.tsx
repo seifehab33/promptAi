@@ -12,7 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Copy, Check } from "lucide-react";
+import { Plus, Copy, Check, Sparkles, Zap, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import useCreatePrompt from "@/api/useCreatePrompt";
@@ -46,9 +46,10 @@ const Dashboard = () => {
     currentResponse,
     isStreaming,
     stopGeneration,
-  } = useCreatePrompt();
+  } = useCreatePrompt("gpt-4o-mini");
   const { savePrompt, data: savedPrompt } = useSavePrompt();
   const [isPublic, setIsPublic] = useState(false);
+
   const handleCopy = async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -104,6 +105,7 @@ const Dashboard = () => {
     );
     setPrompt("");
   };
+
   const handleSharePrompt = () => {
     if (!responses.length && !currentResponse) {
       toast.error("Please generate a response before sharing");
@@ -121,6 +123,7 @@ const Dashboard = () => {
       }
     );
   };
+
   const handleBackToPrivate = () => {
     setIsPublic(false);
     toast.success(
@@ -134,27 +137,39 @@ const Dashboard = () => {
       }
     );
   };
+
   const handleSignOut = () => {
     logout();
   };
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-white dark:bg-promptsmith-dark border-b border-border py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <header className="relative bg-white/10 backdrop-blur-md border-b border-white/20 py-4 shadow-lg">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center">
             <div className="h-8 w-8 rounded-full bg-promptsmith-purple flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
+              <span className="text-white text-sm font-bold">P</span>
             </div>
-            <span className="ml-2 text-lg font-bold gradient-text">
+            <span className="ml-3 text-xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
               PromptSmith
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" className="bg-prompt-gradient text-white">
+            <Button
+              variant="ghost"
+              className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
+            >
               <Image
                 src={publicommunity}
                 alt="public community"
-                className="w-10 h-10  p-1"
+                className="w-10 h-10 p-1"
               />
               <span className="text-sm">Public Community</span>
             </Button>
@@ -162,6 +177,7 @@ const Dashboard = () => {
               variant="ghost"
               onClick={handleSignOut}
               disabled={isPending}
+              className="text-white hover:bg-white/10 border border-white/20"
             >
               Sign Out
             </Button>
@@ -169,61 +185,89 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <Button onClick={() => router.push("/editor")}>
+      <main className="container mx-auto px-4 py-8 relative z-10">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-gray-300 text-lg">
+              Create, manage, and organize your AI prompts
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/editor")}
+            className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Prompt
           </Button>
         </div>
 
         <Tabs defaultValue="create" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="create">Quick Prompt</TabsTrigger>
-            <TabsTrigger value="library">Prompt Library</TabsTrigger>
+          <TabsList className="mb-6 bg-white/10 backdrop-blur-md border-white/20">
+            <TabsTrigger
+              value="create"
+              className="text-white data-[state=active]:bg-purple-500/20 data-[state=active]:border-purple-400"
+            >
+              Quick Prompt
+            </TabsTrigger>
+            <TabsTrigger
+              value="library"
+              className="text-white data-[state=active]:bg-purple-500/20 data-[state=active]:border-purple-400"
+            >
+              Prompt Library
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="create" className="w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
-                <Card className="h-full flex flex-col ">
-                  <CardHeader className="flex justify-between  flex-row gap-4">
+                <Card className="h-full flex flex-col bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
+                  <CardHeader className="flex justify-between flex-row gap-4">
                     <div>
-                      <CardTitle>Craft Your Prompt</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-white text-xl">
+                        Craft Your Prompt
+                      </CardTitle>
+                      <CardDescription className="text-gray-300">
                         Write your prompt and provide context to get the best
                         results
                       </CardDescription>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-6">
                     <div>
                       <div className="space-y-2">
-                        <label className="font-medium">Prompt Title</label>
+                        <label className="text-sm font-medium text-gray-300">
+                          Prompt Title
+                        </label>
                         <Input
                           placeholder="Enter your prompt title here..."
-                          className="w-full"
+                          className="w-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
                           value={promptTitle}
                           onChange={(e) => setPromptTitle(e.target.value)}
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="font-medium">Prompt</label>
+                      <label className="text-sm font-medium text-gray-300">
+                        Prompt
+                      </label>
                       <Textarea
                         placeholder="Enter your prompt here..."
-                        className="min-h-32"
+                        className="min-h-32 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 resize-none"
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="font-medium">Context (Optional)</label>
+                      <label className="text-sm font-medium text-gray-300">
+                        Context (Optional)
+                      </label>
                       <Textarea
                         placeholder="Add any additional context here..."
-                        className="min-h-24"
+                        className="min-h-24 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 resize-none"
                         value={context}
                         onChange={(e) => setContext(e.target.value)}
                       />
@@ -231,7 +275,7 @@ const Dashboard = () => {
                   </CardContent>
                   <CardFooter className="mt-auto">
                     <Button
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
                       onClick={handleGenerateResponse}
                       disabled={isStreaming}
                     >
@@ -242,62 +286,65 @@ const Dashboard = () => {
               </div>
 
               <div>
-                <Card className="h-full">
+                <Card className="h-full bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
                   <CardHeader>
-                    <CardTitle>
-                      AI Response{" "}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-purple-400" />
+                        <CardTitle className="text-white text-xl">
+                          AI Response
+                        </CardTitle>
+                      </div>
                       <Badge
                         className={`${
                           isPublic
-                            ? "bg-prompt-gradient text-clip"
-                            : "bg-gray-800"
+                            ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400 text-green-200"
+                            : "bg-gray-800/50 border-gray-600 text-gray-300"
                         }`}
                       >
                         {isPublic ? "Public" : "Private"}
                       </Badge>
-                    </CardTitle>
-                    <CardDescription className="flex items-center justify-between">
+                    </div>
+                    <CardDescription className="text-gray-300 flex items-center justify-between">
                       See how the AI responds to your prompt
                       <div className="flex gap-2">
                         <Button
-                          className="text-sm bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed   px-2 py-1 rounded-md "
+                          className="text-sm bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1 rounded-md"
                           onClick={handelSavePrompt}
                           disabled={currentResponse ? false : true}
                         >
                           Save Your Prompt
                         </Button>
-                        <div className="w-fit flex items-center gap-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed bg-black text-white  hover:text-white">
-                          {!isPublic && (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.5"
-                              stroke="currentColor"
-                              className="size-5 ml-2"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
-                              />
-                            </svg>
-                          )}
+                        <div className="w-fit flex items-center gap-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className={`text-sm text-white `}>
+                              <div className="text-sm text-white">
                                 {isPublic ? (
                                   <Button
-                                    className="bg-black text-white hover:bg-black/80 hover:text-white disabled:opacity-50  disabled:cursor-not-allowed"
+                                    className="bg-gradient-to-r from-gray-600/20 to-gray-700/20 border-gray-500 text-white hover:from-gray-600/30 hover:to-gray-700/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={handleBackToPrivate}
                                   >
                                     Back to Private
                                   </Button>
                                 ) : (
                                   <Button
-                                    className="bg-black text-white disabled:opacity-50  disabled:cursor-not-allowed hover:bg-black/80 hover:text-white"
+                                    className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400 text-white hover:from-blue-500/30 hover:to-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={handleSharePrompt}
                                   >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth="1.5"
+                                      stroke="currentColor"
+                                      className="size-5 text-white"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
+                                      />
+                                    </svg>
                                     Share to Public Community
                                   </Button>
                                 )}
@@ -305,7 +352,7 @@ const Dashboard = () => {
                             </TooltipTrigger>
                             <TooltipContent
                               side="bottom"
-                              className="bg-black text-white"
+                              className="bg-gray-800 border-gray-600 text-white"
                             >
                               <p className="text-sm">
                                 Share your prompt with the public community by
@@ -318,24 +365,24 @@ const Dashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="bg-muted p-4 rounded-md h-[400px] border border-border overflow-y-auto">
+                    <div className="bg-gray-800/50 p-4 rounded-md h-[400px] border border-white/20 overflow-y-auto">
                       {responses.length > 0 || currentResponse ? (
                         <div className="space-y-6">
                           {responses.map((response) => (
                             <div key={response.id} className="space-y-2">
-                              <div className="bg-background p-3 rounded-md">
-                                <p className="text-sm text-muted-foreground mb-2">
+                              <div className="bg-gray-700/50 p-3 rounded-md border border-gray-600">
+                                <p className="text-sm text-gray-300 mb-2">
                                   Prompt: {response.prompt}
                                 </p>
-                                <p className="whitespace-pre-line flex ">
+                                <p className="whitespace-pre-line flex">
                                   <span className="w-12">
                                     <Image
                                       src={responseai}
                                       alt="response ai"
-                                      className="  mr-2"
+                                      className="mr-2"
                                     />
                                   </span>
-                                  <span className="text-sm">
+                                  <span className="text-sm text-white">
                                     {response.text}
                                   </span>
                                 </p>
@@ -346,7 +393,7 @@ const Dashboard = () => {
                                 onClick={() =>
                                   handleCopy(response.text, response.id)
                                 }
-                                className="text-muted-foreground hover:text-foreground"
+                                className="text-gray-300 hover:text-white hover:bg-gray-700/50"
                               >
                                 {copiedId === response.id ? (
                                   <Check className="h-4 w-4 mr-2" />
@@ -361,24 +408,24 @@ const Dashboard = () => {
                           ))}
                           {isStreaming && (
                             <div className="space-y-2">
-                              <div className="bg-background p-3 rounded-md">
-                                <p className="text-sm text-muted-foreground mb-2">
+                              <div className="bg-gray-700/50 p-3 rounded-md border border-gray-600">
+                                <p className="text-sm text-gray-300 mb-2">
                                   Prompt: {prompt}
                                 </p>
-                                <p className="whitespace-pre-line">
+                                <p className="whitespace-pre-line text-white">
                                   {currentResponse}
                                 </p>
                                 <div className="space-y-2 mt-2">
-                                  <Skeleton className="h-4 w-[80%]" />
-                                  <Skeleton className="h-4 w-[60%]" />
-                                  <Skeleton className="h-4 w-[70%]" />
+                                  <Skeleton className="h-4 w-[80%] bg-gray-600" />
+                                  <Skeleton className="h-4 w-[60%] bg-gray-600" />
+                                  <Skeleton className="h-4 w-[70%] bg-gray-600" />
                                 </div>
                               </div>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <p className="text-muted-foreground italic">
+                        <p className="text-gray-400 italic">
                           {isStreaming
                             ? "Generating response..."
                             : "Response will appear here"}
@@ -390,7 +437,7 @@ const Dashboard = () => {
                     {isStreaming && (
                       <Button
                         variant="destructive"
-                        className="w-full"
+                        className="w-full bg-red-600 hover:bg-red-700"
                         onClick={stopGeneration}
                       >
                         Stop Generation
@@ -398,12 +445,13 @@ const Dashboard = () => {
                     )}
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400 text-white hover:from-blue-500/30 hover:to-cyan-500/30"
                       disabled={!savedPrompt}
                       onClick={() =>
                         router.push(`/editor/advanced/${savedPrompt.id}`)
                       }
                     >
+                      <ArrowRight className="mr-2 h-4 w-4" />
                       Edit in Advanced Editor
                     </Button>
                   </CardFooter>
@@ -413,10 +461,17 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="library">
-            <Card>
+            <Card className="bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
               <CardHeader>
-                <CardTitle>Your Prompt Library</CardTitle>
-                <CardDescription>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <CardTitle className="text-white text-xl">
+                    Your Prompt Library
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-gray-300">
                   Access your saved prompts and templates
                 </CardDescription>
               </CardHeader>
@@ -424,7 +479,7 @@ const Dashboard = () => {
                 <div className="flex items-center mb-6">
                   <Input
                     placeholder="Search your prompts..."
-                    className="max-w-md"
+                    className="max-w-md bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />

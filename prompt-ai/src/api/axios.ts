@@ -9,6 +9,7 @@ const api = axios.create({
 // Token refresh management
 let refreshTimeout: NodeJS.Timeout | null = null;
 let isRefreshing = false;
+let lastRefreshTime = 0;
 
 // Function to schedule token refresh
 const scheduleTokenRefresh = () => {
@@ -20,20 +21,36 @@ const scheduleTokenRefresh = () => {
   // Schedule refresh 1 minute before expiration (14 minutes after login)
   const refreshTime = 14 * 60 * 1000; // 14 minutes in milliseconds
   refreshTimeout = setTimeout(async () => {
-    if (!isRefreshing) {
-      isRefreshing = true;
-      try {
-        console.log("🔄 Auto-refreshing token before expiration...");
-        await api.post("/auth/refresh");
-        console.log("✅ Token auto-refresh successful");
-        // Schedule next refresh
-        scheduleTokenRefresh();
-      } catch (error) {
-        console.log("❌ Auto-refresh failed:", error);
-        window.location.href = "/SignIn";
-      } finally {
-        isRefreshing = false;
-      }
+    // Prevent multiple simultaneous refreshes
+    if (isRefreshing) {
+      console.log("🔄 Auto-refresh: Already refreshing, skipping...");
+      return;
+    }
+
+    // Prevent refreshing too frequently (at least 30 seconds between refreshes)
+    const now = Date.now();
+    if (now - lastRefreshTime < 30000) {
+      console.log(
+        "🔄 Auto-refresh: Too soon since last refresh, rescheduling..."
+      );
+      scheduleTokenRefresh();
+      return;
+    }
+
+    isRefreshing = true;
+    try {
+      console.log("🔄 Auto-refreshing token before expiration...");
+      await api.post("/auth/refresh");
+      console.log("✅ Token auto-refresh successful");
+      lastRefreshTime = Date.now();
+      // Schedule next refresh
+      scheduleTokenRefresh();
+    } catch (error) {
+      console.log("❌ Auto-refresh failed:", error);
+      // Don't redirect immediately on auto-refresh failure
+      // Let the middleware handle it
+    } finally {
+      isRefreshing = false;
     }
   }, refreshTime);
 };

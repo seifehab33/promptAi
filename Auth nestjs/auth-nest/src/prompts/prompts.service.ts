@@ -41,7 +41,13 @@ export class PromptsService {
         promptDescription: true,
         promptTags: true,
         promptContext: true,
-        user: { email: true },
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          id: true,
+          email: true,
+          name: true,
+        },
       },
       relations: {
         user: true,
@@ -81,10 +87,9 @@ export class PromptsService {
       .createQueryBuilder('prompt')
       .leftJoinAndSelect('prompt.user', 'user')
       .where('user.id = :userId', { userId })
-      .andWhere(
-        '(LOWER(prompt.promptTitle) LIKE :search OR LOWER(prompt.promptDescription) LIKE :search OR LOWER(prompt.promptContext) LIKE :search OR LOWER(prompt.promptTags) LIKE :search)',
-        { search: `%${searchQuery}%` },
-      )
+      .andWhere('LOWER(prompt.promptTitle) LIKE :search', {
+        search: `%${searchQuery}%`,
+      })
       .getMany();
   }
 
@@ -99,6 +104,34 @@ export class PromptsService {
     }
 
     return this.promptRepo.update(id, dto);
+  }
+  async sharePrompt(promptId: number, userId: number) {
+    const prompt = await this.promptRepo.findOne({
+      where: { id: promptId, user: { id: userId } },
+      relations: ['user'],
+    });
+
+    if (!prompt) {
+      throw new NotFoundException('Prompt not found');
+    }
+    prompt.isPublic = true;
+
+    return this.promptRepo.save(prompt);
+  }
+
+  async unsharePrompt(promptId: number, userId: number) {
+    const prompt = await this.promptRepo.findOne({
+      where: { id: promptId, user: { id: userId } },
+      relations: ['user'],
+    });
+
+    if (!prompt) {
+      throw new NotFoundException('Prompt not found');
+    }
+
+    prompt.isPublic = false;
+
+    return this.promptRepo.save(prompt);
   }
 
   async deletePrompt(id: number, userId: number) {

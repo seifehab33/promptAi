@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import api from "./api/axios";
+import axios from "axios";
+
+// Create a server-side axios instance for middleware
+const serverApi = axios.create({
+  baseURL: "http://localhost:3001",
+  timeout: 10000,
+});
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
@@ -25,9 +31,13 @@ export async function middleware(req: NextRequest) {
     // If we have a refresh token, try to refresh
     if (refreshToken) {
       console.log("🔄 Middleware: No access token, attempting refresh...");
+      console.log(
+        "🔄 Middleware: Refresh token exists:",
+        refreshToken.substring(0, 20) + "..."
+      );
 
       try {
-        const refreshResponse = await api.post(
+        const refreshResponse = await serverApi.post(
           "/auth/refresh",
           {},
           {
@@ -42,20 +52,45 @@ export async function middleware(req: NextRequest) {
           // Get the new cookies from the response
           const setCookieHeader = refreshResponse.headers["set-cookie"];
           if (setCookieHeader) {
+            console.log(
+              "✅ Middleware: Setting new cookies:",
+              setCookieHeader.length
+            );
             // Create response with new cookies
             const response = NextResponse.next();
-            response.headers.set("set-cookie", setCookieHeader[0]);
+            // Set both cookies from the response
+            setCookieHeader.forEach((cookie) => {
+              response.headers.append("set-cookie", cookie);
+            });
             return response;
           }
         } else {
-          console.log("❌ Middleware: Token refresh failed");
+          console.log(
+            "❌ Middleware: Token refresh failed with status:",
+            refreshResponse.status
+          );
         }
-      } catch (error) {
-        console.log("❌ Middleware: Token refresh error:", error);
+      } catch (error: unknown) {
+        const axiosError = error as {
+          response?: { status?: number; data?: unknown };
+        };
+        console.log(
+          "❌ Middleware: Token refresh error:",
+          axiosError.response?.status,
+          axiosError.response?.data
+        );
+
+        // If it's a 401, the refresh token is invalid/expired
+        if (axiosError.response?.status === 401) {
+          console.log("❌ Middleware: Refresh token is invalid or expired");
+        }
       }
+    } else {
+      console.log("❌ Middleware: No refresh token available");
     }
 
     // If refresh failed or no refresh token, redirect to login
+    console.log("🔄 Middleware: Redirecting to login");
     return NextResponse.redirect(new URL("/SignIn", req.url));
   }
 

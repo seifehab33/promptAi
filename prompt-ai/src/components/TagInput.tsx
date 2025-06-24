@@ -35,7 +35,6 @@ const TagInput = ({ tags, setTags }: TagInputProps) => {
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">Tags</label>
       <div className="flex flex-wrap gap-2 mb-2">
         {tags.map((tag) => (
           <Badge key={tag} variant="secondary" className="gap-1 py-1">
@@ -59,7 +58,7 @@ const TagInput = ({ tags, setTags }: TagInputProps) => {
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="pl-8"
+            className="pl-8 text-white"
           />
         </div>
         <Button variant="outline" onClick={handleAddTag} type="button">
