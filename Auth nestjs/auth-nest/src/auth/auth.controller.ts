@@ -27,9 +27,9 @@ export class AuthController {
   async login(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(dto);
 
-    // Set access token (short-lived, 15 minutes)
+    // Set access token (short-lived, 15 minutes) - NOT HttpOnly so middleware can read it
     res.cookie('access_token', tokens.data.access_token, {
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript and middleware access
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
@@ -69,9 +69,9 @@ export class AuthController {
 
     const result = await this.authService.register(dto, authDto);
 
-    // Set access token (short-lived, 15 minutes)
+    // Set access token (short-lived, 15 minutes) - NOT HttpOnly so middleware can read it
     res.cookie('access_token', result.data.access_token, {
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript and middleware access
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
@@ -110,18 +110,18 @@ export class AuthController {
     try {
       const tokens = await this.authService.refresh(refreshToken);
 
-      // Set new access token (short-lived, 15 minutes)
+      // Set new access token (short-lived, 15 minutes) - NOT HttpOnly so it can be accessed by JS
       res.cookie('access_token', tokens.data.access_token, {
-        httpOnly: true,
+        httpOnly: false, // Allow JavaScript access
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 15 * 60 * 1000, // 15 minutes
         path: '/',
       });
 
-      // Set new refresh token (long-lived, 7 days)
+      // Set new refresh token (long-lived, 7 days) - HttpOnly for security
       res.cookie('refresh_token', tokens.data.refresh_token, {
-        httpOnly: true,
+        httpOnly: true, // Secure, not accessible by JavaScript
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -139,14 +139,14 @@ export class AuthController {
     } catch (error) {
       // Clear invalid tokens
       res.clearCookie('access_token', {
-        httpOnly: true,
+        httpOnly: false, // Match the setting when it was set
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
       });
 
       res.clearCookie('refresh_token', {
-        httpOnly: true,
+        httpOnly: true, // Match the setting when it was set
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
@@ -173,7 +173,7 @@ export class AuthController {
   logout(@Req() req, @Res({ passthrough: true }) res: Response) {
     // Clear access token
     res.clearCookie('access_token', {
-      httpOnly: true,
+      httpOnly: false, // Match the setting when it was set
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',

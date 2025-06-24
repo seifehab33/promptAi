@@ -1,6 +1,6 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import api from "./axios";
+import api, { stopAutoRefresh } from "./axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 const handleLogout = async () => {
@@ -12,6 +12,8 @@ const useLogout = () => {
   const { mutate, isPending, error } = useMutation({
     mutationFn: handleLogout,
     onSuccess: () => {
+      // Stop automatic token refresh
+      stopAutoRefresh();
       toast.success("Logged out successfully", {
         style: {
           backgroundColor: "green",

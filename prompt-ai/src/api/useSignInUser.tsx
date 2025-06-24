@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SignInData, SignResponse } from "@/types/type";
 import { useRouter } from "next/navigation";
-import api from "./axios";
+import api, { startAutoRefresh } from "./axios";
 import { AxiosError } from "axios";
 
 const signInUser = async (data: SignInData) => {
@@ -16,6 +16,7 @@ function useSignInUser() {
     mutationFn: signInUser,
     onSuccess: () => {
       toast.success("User signed in successfully!");
+      startAutoRefresh();
       setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
