@@ -20,7 +20,8 @@ const useLogout = () => {
           color: "white",
         },
       });
-      router.push("/");
+      window.history.replaceState(null, "", "/");
+      router.replace("/");
     },
     onError: () => {
       toast.error("Failed to logout", {

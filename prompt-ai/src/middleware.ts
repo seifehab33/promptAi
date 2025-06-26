@@ -11,6 +11,7 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
   const protectedRoutes = ["/dashboard", "/Dashboard", "/editor"];
+  const isMainPage = req.nextUrl.pathname === "/";
   const authRoutes = [
     "/SignIn",
     "/SignUp",
@@ -88,20 +89,31 @@ export async function middleware(req: NextRequest) {
     } else {
       console.log("❌ Middleware: No refresh token available");
     }
-
-    // If refresh failed or no refresh token, redirect to login
     console.log("🔄 Middleware: Redirecting to login");
+    // If refresh failed or no refresh token, redirect to login
     return NextResponse.redirect(new URL("/SignIn", req.url));
   }
 
   // If user has access token and is on main page, redirect to dashboard
-  if (req.nextUrl.pathname === "/" && token && token.trim() !== "") {
+  if (isMainPage && token && token.trim() !== "") {
+    console.log(
+      "🔄 Middleware: Authenticated user on main page, redirecting to dashboard"
+    );
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   // If user has access token and tries to access auth pages, redirect to dashboard
   if (isAuthRoute && token && token.trim() !== "") {
+    console.log(
+      "🔄 Middleware: Authenticated user on auth page, redirecting to dashboard"
+    );
     return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  // Allow access to main page for unauthenticated users
+  if (isMainPage && (!token || token.trim() === "")) {
+    console.log("✅ Middleware: Allowing unauthenticated access to main page");
+    return NextResponse.next();
   }
 
   return NextResponse.next();

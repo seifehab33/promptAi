@@ -21,7 +21,6 @@ import PromptLibrary from "@/components/PromptLibrary/PromptLibrary";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDebounce from "@/hooks/useDebounce";
 import responseai from "@/assets/images/response ai.svg";
-import publicommunity from "@/assets/images/publicommunity.svg";
 import Image from "next/image";
 import {
   Tooltip,
@@ -29,7 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import useLogout from "@/api/useLogout";
+import AuthNav from "@/components/AuthNav/AuthNav";
 
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
@@ -39,7 +38,6 @@ const Dashboard = () => {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const router = useRouter();
-  const { logout, isPending } = useLogout();
   const {
     generatePrompt,
     responses,
@@ -138,10 +136,6 @@ const Dashboard = () => {
     );
   };
 
-  const handleSignOut = () => {
-    logout();
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated background elements */}
@@ -151,39 +145,7 @@ const Dashboard = () => {
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <header className="relative bg-white/10 backdrop-blur-md border-b border-white/20 py-4 shadow-lg">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-full bg-promptsmith-purple flex items-center justify-center">
-              <span className="text-white text-sm font-bold">P</span>
-            </div>
-            <span className="ml-3 text-xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              PromptSmith
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
-            >
-              <Image
-                src={publicommunity}
-                alt="public community"
-                className="w-10 h-10 p-1"
-              />
-              <span className="text-sm">Public Community</span>
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={handleSignOut}
-              disabled={isPending}
-              className="text-white hover:bg-white/10 border border-white/20"
-            >
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AuthNav />
 
       <main className="container mx-auto px-4 py-8 relative z-10">
         <div className="flex justify-between items-center mb-8">
