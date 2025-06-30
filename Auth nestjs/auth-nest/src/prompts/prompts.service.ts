@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PromptEntity } from './entity/prompt.entity';
 import { Repository } from 'typeorm';
@@ -19,6 +23,7 @@ export class PromptsService {
       promptContext: dto.promptContext,
       isPublic: dto.isPublic || false,
       user: { id: userId },
+      // likes: dto.likes || [],
     });
 
     return this.promptRepo.save(prompt);
@@ -43,6 +48,7 @@ export class PromptsService {
         promptContext: true,
         createdAt: true,
         updatedAt: true,
+        // likes: true,
         user: {
           id: true,
           email: true,
@@ -146,4 +152,21 @@ export class PromptsService {
 
     return this.promptRepo.delete(id);
   }
+  // async likePrompt(promptId: number, userId: number) {
+  //   const prompt = await this.promptRepo.findOne({
+  //     where: { id: promptId },
+  //     relations: ['user'],
+  //   });
+  //   if (!prompt) {
+  //     throw new NotFoundException('Prompt not Found');
+  //   }
+  //   if (prompt.likes.includes(userId.toString())) {
+  //     prompt.likes = prompt.likes.filter(
+  //       (id: string) => id !== userId.toString(),
+  //     );
+  //   } else {
+  //     prompt.likes = [...prompt.likes, userId.toString()];
+  //   }
+  //   return this.promptRepo.save(prompt);
+  // }
 }

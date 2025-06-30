@@ -41,3 +41,18 @@ export interface ResetPasswordData {
   token: string;
   newPassword: string;
 }
+export interface PublicPrompt {
+  id: string;
+  promptTitle: string;
+  promptDescription: string;
+  promptTags: string[];
+  promptContext: string;
+  isPublic: boolean;
+  likes: number;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: Date;
+}

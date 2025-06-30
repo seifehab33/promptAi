@@ -32,6 +32,8 @@ export class PromptEntity {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   @Transform(({ value }) => formatDate(value))
   last_access: Date;
+  // @Column({ default: 0 })
+  // likes: string[];
   @Index()
   @Column({ default: false })
   isPublic: boolean;

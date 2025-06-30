@@ -1,10 +1,37 @@
 "use client";
 import AuthNav from "@/components/AuthNav/AuthNav";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import person from "@/assets/images/unknown-person.png";
-import { Clock, Ellipsis } from "lucide-react";
-function page() {
+import { Clock, Copy, ThumbsUp } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useGetPublicPrompt, useLikePrompt } from "@/api/useGetPublicPrompt";
+import { PublicPrompt } from "@/types/type";
+import { formatDate } from "@/lib/utils";
+function Page() {
+  const { PublicPrompts, isLoading, isError } = useGetPublicPrompt(1, 10);
+  const { LikePrompt } = useLikePrompt(PublicPrompts[0]?.id || 0);
+  const [showMoreStates, setShowMoreStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  const toggleShowMore = (promptId: string) => {
+    setShowMoreStates((prev) => ({
+      ...prev,
+      [promptId]: !prev[promptId],
+    }));
+  };
+
+  const handleLike = () => {
+    LikePrompt();
+  };
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error</div>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
@@ -29,55 +56,99 @@ function page() {
             </p>
           </div>
         </div>
-        <div className="person-prompt bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg max-w-2xl p-3">
-          <div className="person-info flex items-center justify-between">
-            <div className="person-name flex items-center gap-2">
-              <Image
-                src={person}
-                alt="person"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div className="person-name-info text-white text-sm">
-                <p className="font-bold text-xl">John Doe</p>
-                <p className="text-gray-500 text-xs flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> <span>5 hours ago</span>
-                </p>
+        <div className="grid grid-cols-3  gap-4">
+          {PublicPrompts?.map((prompt: PublicPrompt) => (
+            <div
+              key={prompt.id}
+              className="person-prompt max-h-fit bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg max-w-2xl p-3"
+            >
+              <div className="person-info flex items-center justify-between">
+                <div className="person-name flex items-center gap-2">
+                  <Image
+                    src={person}
+                    alt="person"
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                  <div className="person-name-info text-white text-sm">
+                    <p className="font-bold text-xl capitalize">
+                      {prompt.user.name}
+                    </p>
+                    <p className="text-gray-500 text-xs flex items-center gap-1">
+                      <Clock className="w-3 h-3" />{" "}
+                      <span>{formatDate(prompt.createdAt)}</span>
+                    </p>
+                  </div>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Copy className="w-6 h-6 cursor-pointer" color="white" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-white text-sm">Copy</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <hr className="my-2 border-t border-gray-600" />
+              <div className="person-prompt-itself mt-3 mb-5">
+                <div className="person-prompt-title mb-8">
+                  <p className="text-white text-sm capitalize">
+                    <span className="font-bold">Title : </span>
+                    {prompt.promptTitle}
+                  </p>
+                </div>
+                <div className="person-prompt-content">
+                  <p className="text-white text-sm">
+                    <span className="font-bold">Content : </span>
+                    <span
+                      className={`${
+                        showMoreStates[String(prompt.id)]
+                          ? "line-clamp-none"
+                          : "line-clamp-3"
+                      }`}
+                    >
+                      {prompt.promptDescription}
+                    </span>
+                    {prompt.promptDescription.length > 100 && (
+                      <span
+                        className="text-gray-200   text-bold cursor-pointer text-sm"
+                        onClick={() => toggleShowMore(String(prompt.id))}
+                      >
+                        {showMoreStates[String(prompt.id)]
+                          ? "Read Less..."
+                          : "Read More..."}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div
+                className="
+           prompt-tags mb-5 flex items-center gap-2 *:bg-promptsmith-purple *:px-2 *:w-fit *:text-white *:rounded-xl *:text-sm"
+              >
+                {prompt.promptTags.map((tag: string) => (
+                  <p key={tag}>{tag}</p>
+                ))}
+                {prompt.promptTags.length === 0 && <p>No Tags</p>}
+              </div>
+              <hr className="my-2 border-t border-gray-600" />
+              <div className="like-prompt flex items-center justify-between">
+                <div className="like-prompt-info flex items-center gap-2">
+                  <ThumbsUp
+                    className="w-4 h-4 cursor-pointer"
+                    color="white"
+                    onClick={handleLike}
+                  />
+                  <p className="text-white text-sm">{prompt.likes}</p>
+                </div>
               </div>
             </div>
-            <Ellipsis className="w-8 h-8 cursor-pointer" color="white" />
-          </div>
-          <hr className="my-2 border-t border-gray-600" />
-          <div className="person-prompt-itself mt-3 mb-5">
-            <div className="person-prompt-title mb-8">
-              <p className="text-white text-sm">
-                Title : Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Quisquam, quos.
-              </p>
-            </div>
-            <div className="person-prompt-content">
-              <p className="text-white text-sm">
-                Content : Lorem ipsum dolor sit amet consectetur adipisicing
-                elit. Quisquam, quos.
-              </p>
-            </div>
-          </div>
-          <div className="prompt-tags mb-5 flex items-center gap-2">
-            <p className="bg-promptsmith-purple px-2 w-fit text-white rounded-xl text-sm">
-              Marketing
-            </p>
-            <p className="bg-promptsmith-purple px-2 w-fit text-white rounded-xl text-sm">
-              Tag 2
-            </p>
-            <p className="bg-promptsmith-purple px-2 w-fit text-white rounded-xl text-sm">
-              Tag 3
-            </p>
-          </div>
+          ))}
         </div>
       </main>
     </div>
   );
 }
 
-export default page;
+export default Page;

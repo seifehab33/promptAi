@@ -10,7 +10,7 @@ const serverApi = axios.create({
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
-  const protectedRoutes = ["/dashboard", "/Dashboard", "/editor"];
+  const protectedRoutes = ["/dashboard", "/Dashboard", "/editor", "/community"];
   const isMainPage = req.nextUrl.pathname === "/";
   const authRoutes = [
     "/SignIn",
@@ -129,5 +129,6 @@ export const config = {
     "/SignUp/:path*",
     "/forget-password/:path*",
     "/reset-password/:path*",
+    "/community/:path*",
   ],
 };

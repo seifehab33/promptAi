@@ -70,4 +70,8 @@ export class PromptsController {
   deletePrompt(@Param('id') id: number, @GetUser() user: any) {
     return this.promptsService.deletePrompt(id, user.userId);
   }
+  // @Post(':id/like')
+  // async likePrompt(@Param('id') id: number, @GetUser() user: any) {
+  //   return this.promptsService.likePrompt(id, user.userId);
+  // }
 }

@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -23,4 +24,7 @@ export class PromptDto {
   @IsBoolean()
   @IsOptional()
   isPublic?: boolean;
+  @IsArray()
+  @IsOptional()
+  likes?: string[];
 }

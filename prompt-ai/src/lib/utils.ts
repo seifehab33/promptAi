@@ -17,3 +17,12 @@ export function getOrCreateSessionId() {
 
   return sessionId;
 }
+export function formatDate(date: Date) {
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (diffDays === 0 || diffDays === 1) {
+    return "Today";
+  }
+  return `${diffDays} days ago`;
+}
