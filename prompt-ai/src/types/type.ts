@@ -1,3 +1,7 @@
+export interface User {
+  name: string;
+  email: string;
+}
 export interface SignUpData {
   name: string;
   email: string;

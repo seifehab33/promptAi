@@ -1,14 +1,17 @@
+"use client";
 import React from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import publicommunity from "@/assets/images/publicommunity.svg";
 import useLogout from "@/api/useLogout";
 import { usePathname, useRouter } from "next/navigation";
-
+import { Badge } from "../ui/badge";
+import { useUser } from "@/context/userContext";
+import { parseCookies } from "nookies";
 function AuthNav() {
   const router = useRouter();
   const { logout, isPending } = useLogout();
-
+  const { user } = useUser();
   const handleSignOut = () => {
     logout();
   };
@@ -19,6 +22,9 @@ function AuthNav() {
   const handlePublicCommunity = () => {
     router.push("/community");
   };
+  const cookies = parseCookies();
+  const accessToken = cookies.access_token;
+  // const userName = accessToken?.split(".")[1];
   return (
     <div>
       <header className="relative bg-white/10 backdrop-blur-md border-b border-white/20 py-4 shadow-lg">
@@ -32,6 +38,14 @@ function AuthNav() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <div>
+              <Badge
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white"
+              >
+                {user?.name}
+              </Badge>
+            </div>
             {!isPublicCommunity ? (
               <Button
                 variant="ghost"

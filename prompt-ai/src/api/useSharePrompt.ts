@@ -18,6 +18,10 @@ function useSharePrompt() {
     mutationFn: sharePrompt,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["public-prompt"],
+        exact: false,
+      });
       toast.success("Prompt shared successfully");
     },
     onError: () => {
@@ -33,6 +37,10 @@ const useUnSharePrompt = () => {
     mutationFn: unSharePrompt,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["public-prompt"],
+        exact: false,
+      });
       toast.success("Prompt unshared successfully");
     },
     onError: () => {

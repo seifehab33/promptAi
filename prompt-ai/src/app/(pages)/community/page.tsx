@@ -12,23 +12,43 @@ import {
 import { useGetPublicPrompt, useLikePrompt } from "@/api/useGetPublicPrompt";
 import { PublicPrompt } from "@/types/type";
 import { formatDate } from "@/lib/utils";
+import { toast } from "sonner";
+import { useUser } from "@/context/userContext";
 function Page() {
-  const { PublicPrompts, isLoading, isError } = useGetPublicPrompt(1, 10);
+  const [page, setPage] = useState(1);
+  const { PublicPrompts, meta, isLoading, isError } = useGetPublicPrompt(
+    page,
+    10
+  );
   const { LikePrompt } = useLikePrompt(PublicPrompts[0]?.id || 0);
+  const { user } = useUser();
+  const userName = user?.name;
   const [showMoreStates, setShowMoreStates] = useState<{
     [key: string]: boolean;
   }>({});
-
   const toggleShowMore = (promptId: string) => {
     setShowMoreStates((prev) => ({
       ...prev,
       [promptId]: !prev[promptId],
     }));
   };
-
+  const loadMore = () => {
+    setPage((prev) => prev + 1);
+  };
   const handleLike = () => {
     LikePrompt();
   };
+  const handleCopy = (promptDescription: string) => {
+    navigator.clipboard.writeText(promptDescription);
+    toast.success("Copied to clipboard", {
+      style: {
+        backgroundColor: "#008000",
+        color: "white",
+      },
+    });
+  };
+  // Check if there are more pages to load
+  const hasMorePages = meta && page < meta.totalPages;
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error</div>;
 
@@ -73,7 +93,7 @@ function Page() {
                   />
                   <div className="person-name-info text-white text-sm">
                     <p className="font-bold text-xl capitalize">
-                      {prompt.user.name}
+                      {prompt.user.name === userName ? "You" : prompt.user.name}
                     </p>
                     <p className="text-gray-500 text-xs flex items-center gap-1">
                       <Clock className="w-3 h-3" />{" "}
@@ -81,14 +101,6 @@ function Page() {
                     </p>
                   </div>
                 </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Copy className="w-6 h-6 cursor-pointer" color="white" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-white text-sm">Copy</p>
-                  </TooltipContent>
-                </Tooltip>
               </div>
               <hr className="my-2 border-t border-gray-600" />
               <div className="person-prompt-itself mt-3 mb-5">
@@ -99,8 +111,24 @@ function Page() {
                   </p>
                 </div>
                 <div className="person-prompt-content">
-                  <p className="text-white text-sm">
-                    <span className="font-bold">Content : </span>
+                  <div className="text-white text-sm">
+                    <div className="flex items-center gap-2 justify-between">
+                      <span className="font-bold">Content : </span>{" "}
+                      <Tooltip>
+                        <TooltipTrigger
+                          asChild
+                          onClick={() => handleCopy(prompt.promptDescription)}
+                        >
+                          <Copy
+                            className="w-4 h-4 cursor-pointer"
+                            color="white"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-white text-sm">Copy</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <span
                       className={`${
                         showMoreStates[String(prompt.id)]
@@ -120,7 +148,7 @@ function Page() {
                           : "Read More..."}
                       </span>
                     )}
-                  </p>
+                  </div>
                 </div>
               </div>
               <div
@@ -146,6 +174,16 @@ function Page() {
             </div>
           ))}
         </div>
+        {hasMorePages && (
+          <div className="flex items-center justify-center my-5">
+            <button
+              onClick={loadMore}
+              className="bg-promptsmith-purple text-white px-4 py-2 rounded-md transition-colors  duration-300 hover:bg-promptsmith-purple/80 ease-in-out cursor-pointer"
+            >
+              Load More
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

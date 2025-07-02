@@ -19,12 +19,17 @@ const likePrompt = async (promptId: number) => {
 function useGetPublicPrompt(page: number, limit: number) {
   const { data, isLoading, isError } = useQuery({
     queryFn: () => publicPrompt(page, limit),
-    queryKey: ["public-prompt"],
+    queryKey: ["public-prompt", page, limit],
     staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
-  return { PublicPrompts: data?.data || [], isLoading, isError };
+  return {
+    PublicPrompts: data?.data || [],
+    meta: data?.meta,
+    isLoading,
+    isError,
+  };
 }
 function useLikePrompt(promptId: number) {
   const queryClient = useQueryClient();

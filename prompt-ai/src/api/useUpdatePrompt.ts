@@ -11,6 +11,7 @@ function useUpdatePrompt() {
     onSuccess: () => {
       toast.success("Prompt updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["public-prompt"] });
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(`Error updating prompt: ${error.message}`);

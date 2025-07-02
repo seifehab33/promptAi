@@ -10,15 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tag,
-  Bookmark,
-  BookmarkPlus,
-  Star,
-  Zap,
-  UsersRound,
-  ArrowLeft,
-} from "lucide-react";
+import { Tag, Star, Zap, UsersRound, ArrowLeft } from "lucide-react";
 // import { toast } from "sonner";
 import TagInput from "@/components/TagInput";
 
@@ -27,6 +19,10 @@ import { useRouter } from "next/navigation";
 import TextPrompt from "./_textPrompt";
 import { Textarea } from "@/components/ui/textarea";
 import ImagePrompt from "./_imagePrompt";
+import useSavePrompt from "@/api/useSavePrompt";
+import { PublicPrivateSwitch } from "@/components/Switch/public-private-switch";
+import { useUser } from "@/context/userContext";
+import { Badge } from "@/components/ui/badge";
 const promptTypes = [
   { value: "chat", label: "Chat Prompt", icon: "💬" },
   { value: "image", label: "Image Prompt", icon: "🎨" },
@@ -38,20 +34,31 @@ const promptTypes = [
 const PromptEditor = () => {
   const [promptTitle, setPromptTitle] = useState("");
   const [promptContent, setPromptContent] = useState("");
+  const [promptContext, setPromptContext] = useState("");
   const [promptType, setPromptType] = useState("chat");
   const [tags, setTags] = useState<string[]>([]);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
   // const [isLoading, setIsLoading] = useState(false);
   // const [responses, setResponses] = useState<string[]>([]);
   const router = useRouter();
+  const { user } = useUser();
+  const userName = user?.name;
   const handleBackToDashboard = () => {
     router.push("/dashboard");
   };
   // Predefined ratings to avoid hydration issues
   const sampleRatings = [42, 78, 15];
-
+  const { savePrompt, isPending } = useSavePrompt();
+  const handleSavePrompt = (responseContent?: string) => {
+    savePrompt({
+      promptTitle,
+      promptDescription: responseContent || promptContent,
+      promptContext: promptContext,
+      promptTags: tags,
+      isPublic: isPublic,
+    });
+  };
   // const handleSavePrompt = () => {
   //   // In a real app, this would save to a database
   //   toast.success("Your prompt has been saved to your library.");
@@ -81,14 +88,22 @@ const PromptEditor = () => {
               PromptSmith
             </span>
           </div>
-          <Button
-            variant="ghost"
-            onClick={handleBackToDashboard}
-            className="text-white hover:bg-white/10 border border-white/20"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Dashboard
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="bg-white/10 border-white/20 text-white"
+            >
+              {userName}
+            </Badge>
+            <Button
+              variant="ghost"
+              onClick={handleBackToDashboard}
+              className="text-white hover:bg-white/10 border border-white/20"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Dashboard
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -156,35 +171,10 @@ const PromptEditor = () => {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setIsBookmarked(!isBookmarked)}
-                          className={`border-white/20 hover:bg-white/10 ${
-                            isBookmarked
-                              ? "bg-purple-500/20 border-purple-400"
-                              : ""
-                          }`}
-                        >
-                          {isBookmarked ? (
-                            <Bookmark className="h-4 w-4 text-white fill-white" />
-                          ) : (
-                            <BookmarkPlus className="h-4 w-4 text-black" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setIsLiked(!isLiked)}
-                          className={`border-white/20 hover:bg-white/10 ${
-                            isLiked ? "bg-purple-500/20 border-purple-400" : ""
-                          }`}
-                        >
-                          <Star
-                            className="h-4 w-4 text-black"
-                            fill={isLiked ? "white" : "none"}
-                          />
-                        </Button>
+                        <PublicPrivateSwitch
+                          isPublic={isPublic}
+                          setIsPublic={setIsPublic}
+                        />
                       </div>
                     </div>
                   </div>
@@ -203,17 +193,30 @@ const PromptEditor = () => {
 
                   <div>
                     {(promptType === "chat" || promptType === "code") && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">
-                          Prompt Content
-                        </label>
-                        <Textarea
-                          placeholder="Enter your prompt here... Be specific and detailed for better AI responses."
-                          className="min-h-32 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 resize-none"
-                          value={promptContent}
-                          onChange={(e) => setPromptContent(e.target.value)}
-                        />
-                      </div>
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-300">
+                            Prompt Context
+                          </label>
+                          <Input
+                            placeholder="Enter a descriptive context..."
+                            value={promptContext}
+                            onChange={(e) => setPromptContext(e.target.value)}
+                            className="font-medium text-lg bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-300">
+                            Prompt Content
+                          </label>
+                          <Textarea
+                            placeholder="Enter your prompt here... Be specific and detailed for better AI responses."
+                            className="min-h-32 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 resize-none"
+                            value={promptContent}
+                            onChange={(e) => setPromptContent(e.target.value)}
+                          />
+                        </div>
+                      </>
                     )}
                   </div>
 
@@ -225,7 +228,12 @@ const PromptEditor = () => {
                           AI Response Generation
                         </span>
                       </div>
-                      <TextPrompt prompt={promptContent} pdfRef={pdfRef} />
+                      <TextPrompt
+                        prompt={promptContent}
+                        pdfRef={pdfRef}
+                        handleSavePrompt={handleSavePrompt}
+                        isPending={isPending}
+                      />
                     </div>
                   ) : (
                     <div className="flex items-center justify-end w-full">

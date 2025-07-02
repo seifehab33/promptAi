@@ -64,7 +64,17 @@ export class PromptsService {
       skip,
       take: limit,
     });
-
+    if (prompts.length === 0) {
+      return {
+        data: [],
+        meta: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
+      };
+    }
     return {
       data: prompts,
       meta: {

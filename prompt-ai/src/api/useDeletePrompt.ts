@@ -10,6 +10,10 @@ function useDeletePrompt() {
     onSuccess: () => {
       toast.success("Prompt deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({
+        queryKey: ["public-prompt"],
+        exact: false,
+      });
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(`Error deleting prompt: ${error.message}`);

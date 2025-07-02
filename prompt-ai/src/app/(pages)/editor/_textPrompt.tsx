@@ -16,6 +16,8 @@ import {
 interface PromptProps {
   prompt: string;
   pdfRef: React.RefObject<HTMLDivElement | null>;
+  handleSavePrompt: (responseContent?: string) => void;
+  isPending: boolean;
 }
 
 interface Response {
@@ -25,10 +27,18 @@ interface Response {
   model: string;
 }
 
-function TextPrompt({ prompt, pdfRef }: PromptProps) {
+function TextPrompt({
+  prompt,
+  pdfRef,
+  handleSavePrompt,
+  isPending,
+}: PromptProps) {
   const [responses, setResponses] = useState<{ [key: string]: Response[] }>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeModel, setActiveModel] = useState<string | null>(null);
+  const [latestResponses, setLatestResponses] = useState<{
+    [key: string]: string;
+  }>({});
   const isSDKReady = usePuterSDK();
 
   // Memoize the typesPrompt array to prevent recreation on every render
@@ -171,18 +181,24 @@ function TextPrompt({ prompt, pdfRef }: PromptProps) {
         activeModel === modelName &&
         hook.currentResponse
       ) {
+        const newResponse = {
+          id: `${modelName}-${responses[modelName]?.length || 0}`,
+          prompt: prompt,
+          text: hook.currentResponse,
+          model: modelName,
+        };
+
         setResponses((prev) => ({
           ...prev,
-          [modelName]: [
-            ...(prev[modelName] || []),
-            {
-              id: `${modelName}-${prev[modelName]?.length || 0}`,
-              prompt: prompt,
-              text: hook.currentResponse,
-              model: modelName,
-            },
-          ],
+          [modelName]: [...(prev[modelName] || []), newResponse],
         }));
+
+        // Update latest response for this model
+        setLatestResponses((prev) => ({
+          ...prev,
+          [modelName]: hook.currentResponse,
+        }));
+
         setActiveModel(null);
       }
     };
@@ -328,8 +344,12 @@ function TextPrompt({ prompt, pdfRef }: PromptProps) {
                       variant="outline"
                       size="sm"
                       className="bg-white/10 border-white/20 hover:bg-white/20 text-white w-full"
+                      onClick={() =>
+                        handleSavePrompt(latestResponses[type.name])
+                      }
+                      disabled={isPending || !prompt.trim()}
                     >
-                      <span>Save to Library</span>
+                      <span>Save Prompt</span>
                     </Button>
                   </div>
                 )}
@@ -352,6 +372,9 @@ function TextPrompt({ prompt, pdfRef }: PromptProps) {
     handleCopy,
     handleGenerateResponse,
     handleStopGeneration,
+    handleSavePrompt,
+    isPending,
+    latestResponses,
   ]);
 
   return (
