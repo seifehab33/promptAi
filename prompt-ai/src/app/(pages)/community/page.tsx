@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import person from "@/assets/images/unknown-person.png";
 import { Clock, Copy, ThumbsUp } from "lucide-react";
+import Link from "next/link";
 import {
   Tooltip,
   TooltipContent,
@@ -51,7 +52,7 @@ function Page() {
   const hasMorePages = meta && page < meta.totalPages;
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error</div>;
-
+  console.log(PublicPrompts);
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
@@ -76,6 +77,21 @@ function Page() {
             </p>
           </div>
         </div>
+        {PublicPrompts.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-dvh gap-4">
+            <div className="text-white text-center text-2xl font-bold flex items-center justify-center ">
+              No One Has Shared Any Prompts Yet, Be the First to Share a Prompt
+            </div>
+            <div className="text-white text-center text-2xl font-bold flex items-center justify-center">
+              <Link
+                href="/dashboard"
+                className="text-promptsmith-purple hover:bg-promptsmith-purple hover:border-promptsmith-purple  hover:text-white border-white border border-solid px-4 py-2 rounded-md transition-colors duration-300"
+              >
+                Create a Prompt
+              </Link>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-3  gap-4">
           {PublicPrompts?.map((prompt: PublicPrompt) => (
             <div
@@ -168,7 +184,9 @@ function Page() {
                     color="white"
                     onClick={handleLike}
                   />
-                  <p className="text-white text-sm">{prompt.likes}</p>
+                  <p className="text-white text-sm">
+                    {prompt.likes?.length || 0} Likes
+                  </p>
                 </div>
               </div>
             </div>

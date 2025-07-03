@@ -17,7 +17,7 @@ export class PromptEntity {
   id: number;
   @Column({ default: 'Prompt Title' })
   promptTitle: string;
-  @Column({ default: 'Prompt Description' })
+  @Column({ type: 'text', nullable: true })
   promptDescription: string;
   @Column({ nullable: true, type: 'simple-array' })
   promptTags: string[];

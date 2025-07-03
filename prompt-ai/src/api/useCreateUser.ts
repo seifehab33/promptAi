@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api, { startAutoRefresh } from "./axios";
 import { AxiosError } from "axios";
+import { useUser } from "@/context/userContext";
 
 const createUser = async (data: SignUpData) => {
   const response = await api.post<SignResponse>("/auth/register", data);
@@ -12,6 +13,7 @@ const createUser = async (data: SignUpData) => {
 };
 
 function useCreateUser() {
+  const { refreshUser } = useUser();
   const router = useRouter();
   const { mutate, data, error, isPending } = useMutation({
     mutationFn: createUser,
@@ -21,6 +23,7 @@ function useCreateUser() {
         duration: 1200,
         className: "bg-green-500 text-white",
       });
+      refreshUser();
       setTimeout(() => {
         router.push("/dashboard");
       }, 1900);

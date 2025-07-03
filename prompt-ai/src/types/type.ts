@@ -52,7 +52,7 @@ export interface PublicPrompt {
   promptTags: string[];
   promptContext: string;
   isPublic: boolean;
-  likes: number;
+  likes: string[];
   user: {
     id: string;
     name: string;

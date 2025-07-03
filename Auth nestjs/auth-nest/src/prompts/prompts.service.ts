@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PromptEntity } from './entity/prompt.entity';
 import { MoreThan, Repository } from 'typeorm';
 import { PromptDto } from './dto/prompt.dto';
+import getUserNameFromUserId from 'src/utils/getUserName';
 
 @Injectable()
 export class PromptsService {
@@ -48,7 +49,7 @@ export class PromptsService {
         promptContext: true,
         createdAt: true,
         updatedAt: true,
-        // likes: true,
+        likes: true,
         user: {
           id: true,
           email: true,
@@ -162,28 +163,34 @@ export class PromptsService {
 
     return this.promptRepo.delete(id);
   }
-  // async getPopularPrompts() {
-  //   return this.promptRepo
-  //     .createQueryBuilder('prompt')
-  //     .orderBy('prompt.likes', 'DESC')
-  //     .limit(3)
-  //     .getMany();
-  // }
+  async getPopularPrompts() {
+    return this.promptRepo
+      .createQueryBuilder('prompt')
+      .orderBy('prompt.likes', 'DESC')
+      .limit(3)
+      .getMany();
+  }
+  async likePrompt(promptId: number, userId: number) {
+    const prompt = await this.promptRepo.findOne({
+      where: { id: promptId },
+      relations: ['user'],
+    });
+    if (!prompt) {
+      throw new NotFoundException('Prompt not Found');
+    }
+    // Ensure likes is always an array
+    if (!Array.isArray(prompt.likes)) {
+      prompt.likes = [];
+    }
+
+    const userName = getUserNameFromUserId(userId, prompt.user);
+    console.log(userName);
+    if (prompt.likes?.includes(userName)) {
+      throw new BadRequestException('You have already liked this prompt');
+      // prompt.likes = prompt.likes.filter((id: string) => id !== userName);
+    } else {
+      prompt.likes = [...prompt.likes, userName];
+    }
+    return this.promptRepo.save(prompt);
+  }
 }
-// async likePrompt(promptId: number, userId: number) {
-//   const prompt = await this.promptRepo.findOne({
-//     where: { id: promptId },
-//     relations: ['user'],
-//   });
-//   if (!prompt) {
-//     throw new NotFoundException('Prompt not Found');
-//   }
-//   if (prompt.likes.includes(userId.toString())) {
-//     prompt.likes = prompt.likes.filter(
-//       (id: string) => id !== userId.toString(),
-//     );
-//   } else {
-//     prompt.likes = [...prompt.likes, userId.toString()];
-//   }
-//   return this.promptRepo.save(prompt);
-// }
