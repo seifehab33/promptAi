@@ -37,6 +37,11 @@ export class PromptsController {
     return this.promptsService.getPublicPrompts(page, limit);
   }
 
+  @Get('popular')
+  async getPopularPrompts() {
+    return await this.promptsService.getPopularPrompts();
+  }
+
   @Get('search')
   searchPrompts(@Query('query') query: string, @GetUser() user: any) {
     return this.promptsService.getPromptByQuery(query, user.userId);
@@ -73,9 +78,5 @@ export class PromptsController {
   @Post(':id/like')
   async likePrompt(@Param('id') id: number, @GetUser() user: any) {
     return this.promptsService.likePrompt(id, user.userId);
-  }
-  @Get('popular')
-  async getPopularPrompts() {
-    return await this.promptsService.getPopularPrompts();
   }
 }

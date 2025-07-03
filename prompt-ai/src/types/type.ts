@@ -34,6 +34,12 @@ export interface Prompt {
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
+  likes: string[];
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 export type PromptUpdate = Partial<Prompt>;
 export interface ForgetPassResponse {

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tag, Star, Zap, UsersRound, ArrowLeft } from "lucide-react";
+import { Tag, Zap, ArrowLeft } from "lucide-react";
 // import { toast } from "sonner";
 import TagInput from "@/components/TagInput";
 
@@ -23,6 +23,7 @@ import useSavePrompt from "@/api/useSavePrompt";
 import { PublicPrivateSwitch } from "@/components/Switch/public-private-switch";
 import { useUser } from "@/context/userContext";
 import { Badge } from "@/components/ui/badge";
+import Library from "./_library";
 const promptTypes = [
   { value: "chat", label: "Chat Prompt", icon: "💬" },
   { value: "image", label: "Image Prompt", icon: "🎨" },
@@ -48,7 +49,6 @@ const PromptEditor = () => {
     router.push("/dashboard");
   };
   // Predefined ratings to avoid hydration issues
-  const sampleRatings = [42, 78, 15];
   const { savePrompt, isPending } = useSavePrompt();
   const handleSavePrompt = (responseContent?: string) => {
     savePrompt({
@@ -251,54 +251,7 @@ const PromptEditor = () => {
               </div>
             )} */}
           </div>
-
-          <div>
-            <Card className="bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="h-8 w-8 rounded-full bg-promptsmith-purple/30 backdrop-blur-md border border-white/10 shadow-md flex items-center justify-center">
-                    <UsersRound className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-xl font-semibold text-white">
-                    Community Library
-                  </span>
-                </div>
-                <p className="text-gray-300 mb-6 text-sm">
-                  Discover popular prompts from the community and get inspired
-                  by creative AI interactions.
-                </p>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((item) => (
-                    <Card
-                      key={item}
-                      className="p-4 hover:bg-white/10 cursor-pointer transition-all duration-200 border-white/10 bg-white/5"
-                    >
-                      <div className="font-medium text-white">
-                        Sample Prompt {item}
-                      </div>
-                      <div className="text-sm text-gray-300 mt-1">
-                        A brief description of this community prompt...
-                      </div>
-                      <div className="flex items-center gap-2 mt-3 text-xs text-gray-400">
-                        <Tag className="h-3 w-3" />
-                        <span>chat, writing</span>
-                        <span className="ml-auto flex items-center">
-                          <Star className="h-3 w-3 mr-1" fill="currentColor" />
-                          {sampleRatings[item - 1]}
-                        </span>
-                      </div>
-                    </Card>
-                  ))}
-                  <Button
-                    variant="outline"
-                    className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
-                  >
-                    Browse Library
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <Library />
         </div>
       </main>
 

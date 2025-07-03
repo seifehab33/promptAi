@@ -164,12 +164,38 @@ export class PromptsService {
     return this.promptRepo.delete(id);
   }
   async getPopularPrompts() {
-    return this.promptRepo
+    const prompts = await this.promptRepo
       .createQueryBuilder('prompt')
-      .orderBy('prompt.likes', 'DESC')
+      .leftJoinAndSelect('prompt.user', 'user')
+      .select([
+        'prompt.id',
+        'prompt.promptTitle',
+        'prompt.promptDescription',
+        'prompt.promptTags',
+        'prompt.promptContext',
+        'prompt.createdAt',
+        'prompt.updatedAt',
+        'prompt.likes',
+        'user.id',
+        'user.email',
+        'user.name',
+      ])
+      .where('prompt.isPublic = true')
+      .orderBy('JSON_LENGTH(prompt.likes)', 'DESC') // only by likes
       .limit(3)
       .getMany();
+
+    return {
+      data: prompts,
+      meta: {
+        total: prompts.length,
+        message: prompts.length
+          ? 'Popular prompts retrieved successfully'
+          : 'No popular prompts found',
+      },
+    };
   }
+
   async likePrompt(promptId: number, userId: number) {
     const prompt = await this.promptRepo.findOne({
       where: { id: promptId },
