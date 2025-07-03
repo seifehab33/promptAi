@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PromptEntity } from './entity/prompt.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { PromptDto } from './dto/prompt.dto';
 
 @Injectable()
@@ -162,21 +162,28 @@ export class PromptsService {
 
     return this.promptRepo.delete(id);
   }
-  // async likePrompt(promptId: number, userId: number) {
-  //   const prompt = await this.promptRepo.findOne({
-  //     where: { id: promptId },
-  //     relations: ['user'],
-  //   });
-  //   if (!prompt) {
-  //     throw new NotFoundException('Prompt not Found');
-  //   }
-  //   if (prompt.likes.includes(userId.toString())) {
-  //     prompt.likes = prompt.likes.filter(
-  //       (id: string) => id !== userId.toString(),
-  //     );
-  //   } else {
-  //     prompt.likes = [...prompt.likes, userId.toString()];
-  //   }
-  //   return this.promptRepo.save(prompt);
+  // async getPopularPrompts() {
+  //   return this.promptRepo
+  //     .createQueryBuilder('prompt')
+  //     .orderBy('prompt.likes', 'DESC')
+  //     .limit(3)
+  //     .getMany();
   // }
 }
+// async likePrompt(promptId: number, userId: number) {
+//   const prompt = await this.promptRepo.findOne({
+//     where: { id: promptId },
+//     relations: ['user'],
+//   });
+//   if (!prompt) {
+//     throw new NotFoundException('Prompt not Found');
+//   }
+//   if (prompt.likes.includes(userId.toString())) {
+//     prompt.likes = prompt.likes.filter(
+//       (id: string) => id !== userId.toString(),
+//     );
+//   } else {
+//     prompt.likes = [...prompt.likes, userId.toString()];
+//   }
+//   return this.promptRepo.save(prompt);
+// }
