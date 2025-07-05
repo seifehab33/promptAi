@@ -10,7 +10,6 @@ const savePrompt = async (data: CreatePromptData) => {
     data.promptTitle?.trim() ||
     `AI Prompt - ${data.promptModel || "Unknown Model"}`;
 
-  console.log("Saving prompt with data:", data);
   const requestData = {
     ...data,
     promptContent: data.promptContent || "",
@@ -19,7 +18,6 @@ const savePrompt = async (data: CreatePromptData) => {
     isPublic: data.isPublic || false,
     promptModel: data.promptModel || "gpt-4o-mini",
   };
-  console.log("Request data being sent:", requestData);
 
   // Always check for existing prompt first
   try {
@@ -34,11 +32,9 @@ const savePrompt = async (data: CreatePromptData) => {
     });
 
     if (response.data && response.data.exists) {
-      console.log("Found existing prompt:", response.data);
-
       if (response.data.updated) {
         // Backend already updated the prompt with grouping logic
-        console.log("Backend updated existing prompt:", response.data);
+
         return {
           ...response.data,
           isUpdate: true,
@@ -50,13 +46,11 @@ const savePrompt = async (data: CreatePromptData) => {
           `/prompts/${response.data.promptId}`,
           requestData
         );
-        console.log("Updated existing prompt:", updateResponse.data);
+
         return { ...updateResponse.data, isUpdate: true, grouped: false };
       }
     }
-  } catch (error) {
-    console.log("Check-exists endpoint failed:", error);
-
+  } catch {
     // Fallback: Get all prompts and check locally
     try {
       const existingPromptsResponse = await api.get("/prompts");
@@ -74,18 +68,16 @@ const savePrompt = async (data: CreatePromptData) => {
           `/prompts/${existingPrompt.id}`,
           requestData
         );
-        console.log("Updated existing prompt (fallback):", updateResponse.data);
+
         return { ...updateResponse.data, isUpdate: true };
       }
-    } catch {
-      console.log("Fallback method also failed, creating new prompt");
-    }
+    } catch {}
   }
 
   // Only create new prompt if no existing prompt found
-  console.log("No existing prompt found, creating new prompt");
+
   const response = await api.post("/prompts", requestData);
-  console.log("Create response:", response.data);
+
   return { ...response.data, isUpdate: false };
 };
 

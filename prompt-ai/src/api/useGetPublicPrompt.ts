@@ -37,7 +37,7 @@ function useLikePrompt(promptId: number) {
     mutationFn: () => likePrompt(promptId),
     onSuccess: () => {
       queryClient.invalidateQueries(
-        { queryKey: ["public-prompt"] },
+        { queryKey: ["public-prompt", "popularPrompts"] },
         { cancelRefetch: true }
       );
       toast.success("Prompt liked successfully", {
