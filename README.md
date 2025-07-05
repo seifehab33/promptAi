@@ -50,6 +50,7 @@
 - **TanStack Query (React Query)** – API state management
 - **Axios** – HTTP client for frontend/backend communication
 - **Sonner** – Toast notifications
+- **React Context API** – Global state management (auth,model responses)
 
 ---
 
