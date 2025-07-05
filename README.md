@@ -27,11 +27,8 @@
 ### 👥 Authentication & Dashboards
 - JWT-based auth system (Register/Login)
 - Personal dashboards
-- Team folders and collaboration (planned)
 
-### 📤 Export
-- Export prompts in Markdown or JSON
-- Shareable public URLs
+
 
 ---
 
