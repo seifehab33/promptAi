@@ -89,7 +89,11 @@ export async function middleware(req: NextRequest) {
 
         // If it's a 401, the refresh token is invalid/expired
         if (axiosError.response?.status === 401) {
-          console.log("❌ Middleware: Refresh token is invalid or expired");
+          // Clear cookies on invalid refresh token
+          const response = NextResponse.redirect(new URL("/SignIn", req.url));
+          response.cookies.delete("access_token");
+          response.cookies.delete("refresh_token");
+          return response;
         }
       }
     } else {

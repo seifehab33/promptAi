@@ -18,8 +18,8 @@ const scheduleTokenRefresh = () => {
     clearTimeout(refreshTimeout);
   }
 
-  // Schedule refresh 1 minute before expiration (14 minutes after login)
-  const refreshTime = 14 * 60 * 1000; // 14 minutes in milliseconds
+  // Schedule refresh 2 minutes before expiration (13 minutes after login)
+  const refreshTime = 13 * 60 * 1000; // 13 minutes in milliseconds
   refreshTimeout = setTimeout(async () => {
     // Prevent multiple simultaneous refreshes
     if (isRefreshing) {
@@ -27,9 +27,9 @@ const scheduleTokenRefresh = () => {
       return;
     }
 
-    // Prevent refreshing too frequently (at least 30 seconds between refreshes)
+    // Prevent refreshing too frequently (at least 1 minute between refreshes)
     const now = Date.now();
-    if (now - lastRefreshTime < 30000) {
+    if (now - lastRefreshTime < 60000) {
       console.log(
         "🔄 Auto-refresh: Too soon since last refresh, rescheduling..."
       );
