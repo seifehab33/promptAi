@@ -36,7 +36,10 @@ export class PromptsController {
   ) {
     return this.promptsService.getPublicPrompts(page, limit);
   }
-
+  @Get('model/:model')
+  getPromptByModel(@Param('model') model: string, @GetUser() user: any) {
+    return this.promptsService.getPromptByModel(model, user.userId);
+  }
   @Get('popular')
   async getPopularPrompts() {
     return await this.promptsService.getPopularPrompts();

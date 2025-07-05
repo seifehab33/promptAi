@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ArrowRight } from "lucide-react";
+import responseai from "@/assets/images/response ai.svg";
+
+import Image from "next/image";
 
 const Index = () => {
   return (
@@ -49,11 +52,13 @@ const Index = () => {
                   <div className="rounded-lg bg-card p-6 md:p-8 shadow-inner">
                     <div className="space-y-4">
                       <div className="flex items-start">
-                        <div className="h-8 w-8 rounded-full bg-promptsmith-purple flex-shrink-0 flex items-center justify-center">
-                          <span className="text-white font-bold text-xs">
-                            AI
-                          </span>
-                        </div>
+                        <span className="w-12">
+                          <Image
+                            src={responseai}
+                            alt="response ai"
+                            className="mr-2"
+                          />
+                        </span>
                         <div className="ml-4 bg-muted p-4 rounded-lg rounded-tl-none">
                           <p className="text-sm md:text-base">
                             I&apos;m your AI assistant. How can I help you
@@ -78,14 +83,16 @@ const Index = () => {
                       </div>
 
                       <div className="flex items-start">
-                        <div className="h-8 w-8 rounded-full bg-promptsmith-purple flex-shrink-0 flex items-center justify-center">
-                          <span className="text-white font-bold text-xs">
-                            AI
-                          </span>
-                        </div>
+                        <span className="w-12">
+                          <Image
+                            src={responseai}
+                            alt="response ai"
+                            className="mr-2"
+                          />
+                        </span>
                         <div className="ml-4 bg-muted p-4 rounded-lg rounded-tl-none">
                           <p className="text-sm md:text-base">
-                            I&apos;d be happy to help with your product
+                            I&apos;xd be happy to help with your product
                             descriptions. To create the most compelling content,
                             could you tell me more about:
                             <br />

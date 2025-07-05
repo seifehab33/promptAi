@@ -11,10 +11,16 @@ export class PromptDto {
   userId: number;
   @IsString()
   @IsOptional()
+  promptModel?: string;
+  @IsString()
+  @IsOptional()
   promptTitle?: string;
   @IsString()
   @IsNotEmpty()
   promptDescription: string;
+  @IsString()
+  @IsOptional()
+  promptContent?: string;
   @IsArray()
   @IsOptional()
   promptTags?: string[];

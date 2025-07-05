@@ -5,15 +5,24 @@ import { toast } from "sonner";
 import api from "./axios";
 
 const savePrompt = async (data: CreatePromptData) => {
-  if (!data.promptTitle?.trim()) {
-    throw new Error("Prompt title is required");
-  }
+  // Generate a default title if none is provided
+  const defaultTitle =
+    data.promptTitle?.trim() ||
+    `AI Prompt - ${data.promptModel || "Unknown Model"}`;
 
-  const response = await api.post("/prompts", {
+  console.log("Saving prompt with data:", data);
+  const requestData = {
     ...data,
+    promptContent: data.promptContent || "",
+    promptTitle: defaultTitle,
     promptTags: data.promptTags || [],
     isPublic: data.isPublic || false,
-  });
+    promptModel: data.promptModel || "gpt-4o-mini",
+  };
+  console.log("Request data being sent:", requestData);
+
+  const response = await api.post("/prompts", requestData);
+  console.log("Save response:", response.data);
   return response.data;
 };
 

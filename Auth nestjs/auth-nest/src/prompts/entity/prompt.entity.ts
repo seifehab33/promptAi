@@ -15,10 +15,14 @@ import {
 export class PromptEntity {
   @PrimaryGeneratedColumn()
   id: number;
+  @Column({ default: 'gpt-4o-mini' })
+  promptModel: string;
   @Column({ default: 'Prompt Title' })
   promptTitle: string;
   @Column({ type: 'text', nullable: true })
   promptDescription: string;
+  @Column({ type: 'text', nullable: true })
+  promptContent: string;
   @Column({ nullable: true, type: 'simple-array' })
   promptTags: string[];
   @Column({ default: 'Prompt Context' })

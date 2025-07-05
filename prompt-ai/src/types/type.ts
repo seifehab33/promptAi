@@ -18,6 +18,8 @@ export interface SignInData {
 export interface CreatePromptData {
   promptTitle?: string;
   promptDescription: string;
+  promptContent?: string;
+  promptModel: string;
   promptTags?: string[];
   promptContext?: string;
   isPublic?: boolean;
@@ -27,8 +29,10 @@ export interface ErrorResponse {
 }
 export interface Prompt {
   id: string;
+  promptModel: string;
   promptTitle: string;
   promptDescription: string;
+  promptContent: string;
   promptTags: string[];
   promptContext: string;
   isPublic: boolean;
@@ -53,8 +57,10 @@ export interface ResetPasswordData {
 }
 export interface PublicPrompt {
   id: string;
+  promptModel: string;
   promptTitle: string;
   promptDescription: string;
+  promptContent: string;
   promptTags: string[];
   promptContext: string;
   isPublic: boolean;

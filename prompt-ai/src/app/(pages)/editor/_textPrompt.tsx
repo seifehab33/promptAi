@@ -16,8 +16,13 @@ import {
 interface PromptProps {
   prompt: string;
   pdfRef: React.RefObject<HTMLDivElement | null>;
-  handleSavePrompt: (responseContent?: string) => void;
+  handleSavePrompt: (
+    responseContent?: string,
+    model?: string,
+    promptContentToSave?: string
+  ) => void;
   isPending: boolean;
+  setPromptContent: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface Response {
@@ -27,18 +32,19 @@ interface Response {
   model: string;
 }
 
-function TextPrompt({
+const TextPrompt = React.memo(function TextPrompt({
   prompt,
   pdfRef,
   handleSavePrompt,
   isPending,
+  setPromptContent,
 }: PromptProps) {
   const [responses, setResponses] = useState<{ [key: string]: Response[] }>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeModel, setActiveModel] = useState<string | null>(null);
-  const [latestResponses, setLatestResponses] = useState<{
-    [key: string]: string;
-  }>({});
+  const [pendingPrompt, setPendingPrompt] = useState<{ [key: string]: string }>(
+    {}
+  );
   const isSDKReady = usePuterSDK();
 
   // Memoize the typesPrompt array to prevent recreation on every render
@@ -97,17 +103,15 @@ function TextPrompt({
         toast.error("Please enter a prompt before generating");
         return;
       }
-
-      // Check if Puter SDK is available
       if (!isSDKReady) {
         toast.error(
           "AI service is not available. Please wait a moment and try again."
         );
         return;
       }
-
       setActiveModel(modelName);
-
+      // Store the prompt for this generation for this model
+      setPendingPrompt((prev) => ({ ...prev, [modelName]: prompt }));
       // Get the appropriate hook based on model name
       let hook;
       switch (modelName) {
@@ -126,20 +130,26 @@ function TextPrompt({
         default:
           hook = chatGptHook;
       }
-
       hook.generatePrompt({
         prompt: prompt,
         context: "",
       });
-
       toast.info(
         "Click on Save Your Prompt to save your prompt and call it later",
         {
           duration: 3000,
         }
       );
+      setPromptContent("");
     },
-    [prompt, chatGptHook, claudeHook, deepSeekHook, grokHook, isSDKReady]
+    [
+      chatGptHook,
+      claudeHook,
+      deepSeekHook,
+      grokHook,
+      isSDKReady,
+      setPromptContent,
+    ]
   );
 
   // Memoize the handleStopGeneration function
@@ -179,30 +189,36 @@ function TextPrompt({
       if (
         !hook.isStreaming &&
         activeModel === modelName &&
-        hook.currentResponse
+        hook.currentResponse &&
+        pendingPrompt[modelName]
       ) {
         const newResponse = {
           id: `${modelName}-${responses[modelName]?.length || 0}`,
-          prompt: prompt,
+          prompt: pendingPrompt[modelName],
           text: hook.currentResponse,
           model: modelName,
         };
-
         setResponses((prev) => ({
           ...prev,
           [modelName]: [...(prev[modelName] || []), newResponse],
         }));
-
-        // Update latest response for this model
-        setLatestResponses((prev) => ({
-          ...prev,
-          [modelName]: hook.currentResponse,
-        }));
-
         setActiveModel(null);
+        setPendingPrompt((prev) => ({ ...prev, [modelName]: "" }));
+        // Auto-save prompt after 1.5 seconds
+        const timeoutId = setTimeout(() => {
+          // Find the actual model identifier for this model name
+          const modelType = typesPrompt.find((type) => type.name === modelName);
+          const modelIdentifier = modelType?.model || modelName;
+          // Save the AI response and the prompt content used for generation
+          handleSavePrompt(
+            hook.currentResponse,
+            modelIdentifier,
+            pendingPrompt[modelName]
+          );
+        }, 1500);
+        return () => clearTimeout(timeoutId);
       }
     };
-
     updateResponse(chatGptHook, "ChatGpt");
     updateResponse(claudeHook, "Claude");
     updateResponse(deepSeekHook, "DeepSeek");
@@ -217,7 +233,10 @@ function TextPrompt({
     grokHook.isStreaming,
     grokHook.currentResponse,
     activeModel,
-    prompt,
+    pendingPrompt,
+    responses,
+    handleSavePrompt,
+    typesPrompt,
   ]);
 
   // Memoize the rendered accordion items to prevent unnecessary re-renders
@@ -255,7 +274,12 @@ function TextPrompt({
               <AccordionTrigger className="text-white hover:no-underline flex-1">
                 <span className="text-lg font-bold">{type.name}</span>
               </AccordionTrigger>
-              <FullScreen prompt={prompt} promptTitle={type.name} />
+              <FullScreen
+                model={type.model}
+                prompt={prompt}
+                promptTitle={type.name}
+                onSave={handleSavePrompt}
+              />
             </div>
             <AccordionContent className="px-4 pb-4">
               <div className="bg-gray-800 p-3 rounded-md h-[300px] border border-gray-600 overflow-y-auto">
@@ -294,7 +318,7 @@ function TextPrompt({
                       <div className="space-y-2">
                         <div className="bg-gray-700 p-3 rounded-md">
                           <p className="text-sm text-gray-300 mb-2">
-                            Prompt: {prompt}
+                            Prompt: {pendingPrompt[type.name] || ""}
                           </p>
                           <p className="whitespace-pre-line text-white">
                             {hook.currentResponse}
@@ -340,17 +364,6 @@ function TextPrompt({
                         {isModelPending ? "Generating..." : "Generate Response"}
                       </span>
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white/10 border-white/20 hover:bg-white/20 text-white w-full"
-                      onClick={() =>
-                        handleSavePrompt(latestResponses[type.name])
-                      }
-                      disabled={isPending || !prompt.trim()}
-                    >
-                      <span>Save Prompt</span>
-                    </Button>
                   </div>
                 )}
               </div>
@@ -364,7 +377,6 @@ function TextPrompt({
     responses,
     copiedId,
     activeModel,
-    prompt,
     chatGptHook,
     claudeHook,
     deepSeekHook,
@@ -372,14 +384,14 @@ function TextPrompt({
     handleCopy,
     handleGenerateResponse,
     handleStopGeneration,
-    handleSavePrompt,
     isPending,
-    latestResponses,
+    pendingPrompt,
+    handleSavePrompt,
   ]);
 
   return (
     <div className="flex flex-col gap-4 mt-4">{renderedAccordionItems}</div>
   );
-}
+});
 
 export default TextPrompt;

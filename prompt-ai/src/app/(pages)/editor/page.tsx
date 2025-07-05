@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -50,15 +50,32 @@ const PromptEditor = () => {
   };
   // Predefined ratings to avoid hydration issues
   const { savePrompt, isPending } = useSavePrompt();
-  const handleSavePrompt = (responseContent?: string) => {
-    savePrompt({
+  const handleSavePrompt = useCallback(
+    (
+      responseContent?: string,
+      model?: string,
+      promptContentToSave?: string
+    ) => {
+      savePrompt({
+        promptTitle,
+        promptContent: promptContentToSave || promptContent,
+        promptDescription: responseContent || promptContent,
+        promptContext: promptContext,
+        promptTags: tags,
+        isPublic: isPublic,
+        promptModel: model || promptType,
+      });
+    },
+    [
+      savePrompt,
       promptTitle,
-      promptDescription: responseContent || promptContent,
-      promptContext: promptContext,
-      promptTags: tags,
-      isPublic: isPublic,
-    });
-  };
+      promptContent,
+      promptContext,
+      tags,
+      isPublic,
+      promptType,
+    ]
+  );
   // const handleSavePrompt = () => {
   //   // In a real app, this would save to a database
   //   toast.success("Your prompt has been saved to your library.");
@@ -229,6 +246,7 @@ const PromptEditor = () => {
                         </span>
                       </div>
                       <TextPrompt
+                        setPromptContent={setPromptContent}
                         prompt={promptContent}
                         pdfRef={pdfRef}
                         handleSavePrompt={handleSavePrompt}

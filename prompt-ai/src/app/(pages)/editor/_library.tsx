@@ -1,16 +1,20 @@
+"use client";
 import { useGetPopularPrompts } from "@/api/useGetPopularPrompts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Prompt } from "@/types/type";
 import { Tag, UsersRound, ThumbsUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 function Library() {
   const { PopularPrompts, isLoading, isError } = useGetPopularPrompts();
-  console.log(PopularPrompts);
+  const router = useRouter();
+  const GoToCommunity = () => {
+    router.push("/community");
+  };
   if (isError) return <div>Error</div>;
-
   return (
     <div className="mt-4">
       <Card className="bg-white/10 backdrop-blur-md border-white/20 shadow-xl">
@@ -75,6 +79,7 @@ function Library() {
                 ))}
             <Button
               variant="outline"
+              onClick={GoToCommunity}
               className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
             >
               Browse Library

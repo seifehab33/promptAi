@@ -17,8 +17,12 @@ export class PromptsService {
   ) {}
 
   async createPrompt(dto: PromptDto, userId: number) {
+    console.log('Creating prompt with data:', dto);
+    console.log('Using promptModel:', dto.promptModel || 'gpt-4o-mini');
     const prompt = this.promptRepo.create({
+      promptModel: dto.promptModel || 'gpt-4o-mini',
       promptTitle: dto.promptTitle,
+      promptContent: dto.promptContent,
       promptDescription: dto.promptDescription,
       promptTags: dto.promptTags || [],
       promptContext: dto.promptContext,
@@ -27,9 +31,32 @@ export class PromptsService {
       // likes: dto.likes || [],
     });
 
-    return this.promptRepo.save(prompt);
+    const savedPrompt = await this.promptRepo.save(prompt);
+    console.log(
+      'Saved prompt with ID:',
+      savedPrompt.id,
+      'and model:',
+      savedPrompt.promptModel,
+    );
+    return savedPrompt;
   }
-
+  async getPromptByModel(model: string, userId: number) {
+    console.log(
+      'Searching for prompts with model:',
+      model,
+      'and userId:',
+      userId,
+    );
+    const prompts = await this.promptRepo.find({
+      where: { promptModel: model, user: { id: userId } },
+      relations: ['user'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+    console.log('Found prompts:', prompts.length);
+    return prompts;
+  }
   async getPrompts(userId: number) {
     return this.promptRepo.find({
       where: { user: { id: userId } },
@@ -45,6 +72,7 @@ export class PromptsService {
         id: true,
         promptTitle: true,
         promptDescription: true,
+        promptContent: true,
         promptTags: true,
         promptContext: true,
         createdAt: true,
@@ -171,6 +199,7 @@ export class PromptsService {
         'prompt.id',
         'prompt.promptTitle',
         'prompt.promptDescription',
+        'prompt.promptContent',
         'prompt.promptTags',
         'prompt.promptContext',
         'prompt.createdAt',
