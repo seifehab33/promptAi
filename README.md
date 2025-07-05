@@ -1,6 +1,6 @@
 # 🧠 PromptSmith
 
-**PromptSmith** is a full-stack AI prompt engineering platform that allows developers, marketers, and prompt creators to design, test, manage, and share prompts across multiple AI models like **OpenAI's ChatGPT** and **Anthropic's Claude** — all in one place.
+**PromptSmith** is a full-stack AI prompt engineering platform that allows developers, marketers, and prompt creators to design, test, manage, and share prompts across multiple AI models like **OpenAI's ChatGPT** and **Anthropic's Claude** **Gork** **DeepSeek** — all in one place.
 
 > Designed as a professional-grade portfolio project demonstrating advanced full-stack architecture, AI API integration, and modern developer tooling.
 
