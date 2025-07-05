@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import React, { useState, useEffect, useMemo } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, ExternalLink } from "lucide-react";
 import useCreatePrompt from "@/api/useCreatePrompt";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import FullScreen from "@/components/Dialogs/FullScreen";
 import { usePuterSDK } from "@/hooks/usePuterSDK";
+import { useRouter } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -46,6 +46,12 @@ const TextPrompt = React.memo(function TextPrompt({
     {}
   );
   const isSDKReady = usePuterSDK();
+  const router = useRouter();
+
+  // Function to navigate to model-specific page
+  const navigateToModelPage = (model: string) => {
+    router.push(`/editor/${model}`);
+  };
 
   // Memoize the typesPrompt array to prevent recreation on every render
   const typesPrompt = useMemo(
@@ -274,12 +280,17 @@ const TextPrompt = React.memo(function TextPrompt({
               <AccordionTrigger className="text-white hover:no-underline flex-1">
                 <span className="text-lg font-bold">{type.name}</span>
               </AccordionTrigger>
-              <FullScreen
-                model={type.model}
-                prompt={prompt}
-                promptTitle={type.name}
-                onSave={handleSavePrompt}
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigateToModelPage(type.model)}
+                  className="text-white hover:bg-white/10"
+                  title={`Open ${type.name} in full screen`}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
             <AccordionContent className="px-4 pb-4">
               <div className="bg-gray-800 p-3 rounded-md h-[300px] border border-gray-600 overflow-y-auto">

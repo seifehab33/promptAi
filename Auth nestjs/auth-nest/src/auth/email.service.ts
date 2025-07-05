@@ -1,26 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
-  private readonly logger = new Logger(EmailService.name);
 
   constructor(private configService: ConfigService) {
     const emailUser = this.configService.get<string>('EMAIL_USER');
     const emailPass = this.configService.get<string>('EMAIL_PASS');
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-
-    this.logger.log(`Email Configuration:
-      Email: ${emailUser}
-      Frontend URL: ${frontendUrl}
-    `);
-
-    if (!emailUser || !emailPass) {
-      this.logger.error('Email credentials not found in configuration');
-      throw new Error('Email configuration is missing');
-    }
 
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
@@ -57,9 +45,7 @@ export class EmailService {
       };
       return await this.transporter.sendMail(mailOptions);
     } catch (error) {
-      this.logger.error(
-        `Failed to send password reset email: ${error.message}`,
-      );
+      console.error(`Failed to send password reset email: ${error.message}`);
       throw error;
     }
   }

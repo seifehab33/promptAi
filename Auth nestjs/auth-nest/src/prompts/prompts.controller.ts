@@ -82,4 +82,27 @@ export class PromptsController {
   async likePrompt(@Param('id') id: number, @GetUser() user: any) {
     return this.promptsService.likePrompt(id, user.userId);
   }
+
+  @Get('check-exists')
+  async checkPromptExists(
+    @Query('promptTitle') promptTitle: string,
+    @Query('promptModel') promptModel: string,
+    @GetUser() user: any,
+  ) {
+    return this.promptsService.checkPromptExists(
+      promptTitle,
+      promptModel,
+      user.userId,
+    );
+  }
+
+  @Post('check-exists')
+  async checkAndUpdatePrompt(@Body() updateData: any, @GetUser() user: any) {
+    return this.promptsService.checkPromptExists(
+      updateData.promptTitle,
+      updateData.promptModel,
+      user.userId,
+      updateData,
+    );
+  }
 }

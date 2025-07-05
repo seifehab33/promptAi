@@ -210,7 +210,7 @@ function Page() {
                       <span
                         className={`${
                           showMoreStates[String(prompt.id)]
-                            ? "line-clamp-none"
+                            ? "line-clamp-none whitespace-pre-wrap"
                             : "line-clamp-3"
                         }`}
                       >

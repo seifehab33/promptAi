@@ -13,6 +13,8 @@ const useGetPromptByModel = (model: string, shouldFetch: boolean = false) => {
   return useQuery<Prompt[]>({
     queryKey: ["prompts-model", model],
     queryFn: () => getPromptByModel(model),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    refetchOnWindowFocus: false,
     enabled: !!model && shouldFetch, // only run if model is provided and shouldFetch is true
   });
 };

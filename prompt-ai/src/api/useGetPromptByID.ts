@@ -7,7 +7,7 @@ const getPromptByID = async (id: string) => {
 };
 
 const useGetPromptByID = (id: string) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["prompt", id],
     queryFn: () => getPromptByID(id),
     enabled: !!id,
@@ -15,7 +15,7 @@ const useGetPromptByID = (id: string) => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch };
 };
 
 export default useGetPromptByID;

@@ -72,3 +72,18 @@ export interface PublicPrompt {
   };
   createdAt: Date;
 }
+export interface PromptFormFieldsProps {
+  promptTitle: string;
+  setPromptTitle: (title: string) => void;
+  promptContext: string;
+  setPromptContext: (context: string) => void;
+  tags: string[];
+  setTags: (tags: string[]) => void;
+  isPublic: boolean;
+  setIsPublic: (isPublic: boolean) => void;
+  showTitle?: boolean;
+  showContext?: boolean;
+  showTags?: boolean;
+  showPublicToggle?: boolean;
+  className?: string;
+}

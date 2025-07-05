@@ -11,7 +11,7 @@ function useDeletePrompt() {
       toast.success("Prompt deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
       queryClient.invalidateQueries({
-        queryKey: ["public-prompt"],
+        queryKey: ["public-prompt", "prompts-model"],
         exact: false,
       });
     },

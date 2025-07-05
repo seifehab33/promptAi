@@ -17,8 +17,6 @@ export class PromptsService {
   ) {}
 
   async createPrompt(dto: PromptDto, userId: number) {
-    console.log('Creating prompt with data:', dto);
-    console.log('Using promptModel:', dto.promptModel || 'gpt-4o-mini');
     const prompt = this.promptRepo.create({
       promptModel: dto.promptModel || 'gpt-4o-mini',
       promptTitle: dto.promptTitle,
@@ -32,21 +30,10 @@ export class PromptsService {
     });
 
     const savedPrompt = await this.promptRepo.save(prompt);
-    console.log(
-      'Saved prompt with ID:',
-      savedPrompt.id,
-      'and model:',
-      savedPrompt.promptModel,
-    );
+
     return savedPrompt;
   }
   async getPromptByModel(model: string, userId: number) {
-    console.log(
-      'Searching for prompts with model:',
-      model,
-      'and userId:',
-      userId,
-    );
     const prompts = await this.promptRepo.find({
       where: { promptModel: model, user: { id: userId } },
       relations: ['user'],
@@ -54,7 +41,7 @@ export class PromptsService {
         createdAt: 'DESC',
       },
     });
-    console.log('Found prompts:', prompts.length);
+
     return prompts;
   }
   async getPrompts(userId: number) {
@@ -239,7 +226,7 @@ export class PromptsService {
     }
 
     const userName = getUserNameFromUserId(userId, prompt.user);
-    console.log(userName);
+
     if (prompt.likes?.includes(userName)) {
       throw new BadRequestException('You have already liked this prompt');
       // prompt.likes = prompt.likes.filter((id: string) => id !== userName);
@@ -247,5 +234,132 @@ export class PromptsService {
       prompt.likes = [...prompt.likes, userName];
     }
     return this.promptRepo.save(prompt);
+  }
+
+  async checkPromptExists(
+    promptTitle: string,
+    promptModel: string,
+    userId: number,
+    updateData?: any,
+  ) {
+    // First, check if a prompt with the same title and model exists
+    const existingPrompt = await this.promptRepo.findOne({
+      where: {
+        promptTitle,
+        promptModel,
+        user: { id: userId },
+      },
+      select: [
+        'id',
+        'promptTitle',
+        'promptModel',
+        'promptContent',
+        'promptDescription',
+      ],
+    });
+
+    if (existingPrompt) {
+      if (updateData) {
+        // If we found an existing prompt with the same title, always update it
+
+        // Update the existing prompt with new content
+        const updatedContent = existingPrompt.promptContent
+          ? `${existingPrompt.promptContent}\n\n--- Additional Prompt ---\n${updateData.promptContent}`
+          : updateData.promptContent;
+
+        const updatedDescription = existingPrompt.promptDescription
+          ? `${existingPrompt.promptDescription}\n\n--- Latest Update ---\n${updateData.promptDescription}`
+          : updateData.promptDescription;
+
+        // Update the existing prompt
+        await this.promptRepo.update(existingPrompt.id, {
+          promptContent: updatedContent,
+          promptDescription: updatedDescription,
+          promptTags: updateData.promptTags || existingPrompt.promptTags,
+          isPublic:
+            updateData.isPublic !== undefined
+              ? updateData.isPublic
+              : existingPrompt.isPublic,
+          promptContext:
+            updateData.promptContext || existingPrompt.promptContext,
+        });
+
+        return {
+          exists: true,
+          promptId: existingPrompt.id,
+          promptTitle: existingPrompt.promptTitle,
+          promptModel: existingPrompt.promptModel,
+          updated: true,
+          grouped: true,
+        };
+      }
+
+      // If no updateData or content is not similar, just return that it exists
+      return {
+        exists: true,
+        promptId: existingPrompt.id,
+        promptTitle: existingPrompt.promptTitle,
+        promptModel: existingPrompt.promptModel,
+        updated: false,
+        grouped: false,
+      };
+    }
+
+    return {
+      exists: false,
+      promptId: null,
+      promptTitle: null,
+      promptModel: null,
+      updated: false,
+      grouped: false,
+    };
+  }
+
+  private isSimilarPromptContent(
+    existingContent: string,
+    newContent: string,
+  ): boolean {
+    if (!existingContent || !newContent) {
+      return false;
+    }
+
+    // Normalize content for comparison
+    const normalizeContent = (content: string) => {
+      return content
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .replace(/[^\w\s]/g, ''); // Remove punctuation
+    };
+
+    const normalizedExisting = normalizeContent(existingContent);
+    const normalizedNew = normalizeContent(newContent);
+
+    // Check for exact match
+    if (normalizedExisting === normalizedNew) {
+      return true;
+    }
+
+    // Check if one is contained within the other (with some tolerance)
+    if (
+      normalizedExisting.includes(normalizedNew) ||
+      normalizedNew.includes(normalizedExisting)
+    ) {
+      return true;
+    }
+
+    // Calculate similarity using simple word overlap
+    const existingWords = new Set(normalizedExisting.split(' '));
+    const newWords = new Set(normalizedNew.split(' '));
+
+    const intersection = new Set(
+      [...existingWords].filter((x) => newWords.has(x)),
+    );
+    const union = new Set([...existingWords, ...newWords]);
+
+    const similarity = intersection.size / union.size;
+
+    // Consider similar if more than 70% of words overlap
+    return similarity > 0.7;
   }
 }

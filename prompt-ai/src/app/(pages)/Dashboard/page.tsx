@@ -78,6 +78,7 @@ const Dashboard = () => {
       promptContext: context,
       promptTags: [],
       isPublic: isPublic || false,
+      promptModel: "gpt-4o-mini",
     });
     setContext("");
     setPromptTitle("");

@@ -25,7 +25,6 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       port: parseInt(process.env.DATABASE_PORT || '3306'),
-      logging: ['error', 'warn', 'query'],
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),

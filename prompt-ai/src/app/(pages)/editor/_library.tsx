@@ -62,7 +62,7 @@ function Library() {
                     </div>
                     <div className="flex items-center gap-2 mt-3 text-xs text-gray-400">
                       <Tag className="h-3 w-3" />
-                      {item.promptTags.length === 0 ? (
+                      {!item.promptTags || item.promptTags.length === 0 ? (
                         <span>No tags</span>
                       ) : (
                         <span>{item.promptTags.join(", ")}</span>
@@ -72,7 +72,7 @@ function Library() {
                           className="h-3 w-3 mr-1"
                           fill="currentColor"
                         />
-                        <span>{item.likes.length}</span>
+                        <span>{item.likes?.length || 0}</span>
                       </span>
                     </div>
                   </Card>
