@@ -214,7 +214,7 @@ export class PromptsService {
 
   async likePrompt(promptId: number, userId: number) {
     const prompt = await this.promptRepo.findOne({
-      where: { id: promptId },
+      where: { id: promptId, user: { id: userId } },
       relations: ['user'],
     });
     if (!prompt) {

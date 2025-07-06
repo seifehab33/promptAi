@@ -31,15 +31,19 @@ function useGetPublicPrompt(page: number, limit: number) {
     isError,
   };
 }
-function useLikePrompt(promptId: number) {
+function useLikePrompt() {
   const queryClient = useQueryClient();
   const { mutate, isPending, error } = useMutation({
-    mutationFn: () => likePrompt(promptId),
+    mutationFn: (promptId: number) => likePrompt(promptId),
     onSuccess: () => {
-      queryClient.invalidateQueries(
-        { queryKey: ["public-prompt", "popularPrompts"] },
-        { cancelRefetch: true }
-      );
+      queryClient.invalidateQueries({
+        queryKey: ["public-prompt"],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["popularPrompts"],
+        exact: false,
+      });
       toast.success("Prompt liked successfully", {
         style: {
           backgroundColor: "green",

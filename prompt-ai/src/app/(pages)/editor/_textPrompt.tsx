@@ -146,7 +146,6 @@ const TextPrompt = React.memo(function TextPrompt({
           duration: 3000,
         }
       );
-      setPromptContent("");
     },
     [
       chatGptHook,

@@ -23,7 +23,7 @@ function Page() {
     page,
     10
   );
-  const { LikePrompt } = useLikePrompt(PublicPrompts[0]?.id || 0);
+  const { LikePrompt } = useLikePrompt();
   const { user } = useUser();
   const userName = user?.name;
   const [showMoreStates, setShowMoreStates] = useState<{
@@ -38,8 +38,8 @@ function Page() {
   const loadMore = () => {
     setPage((prev) => prev + 1);
   };
-  const handleLike = () => {
-    LikePrompt();
+  const handleLike = (promptId: string) => {
+    LikePrompt(Number(promptId));
   };
   const handleCopy = (promptDescription: string) => {
     navigator.clipboard.writeText(promptDescription);
@@ -54,8 +54,6 @@ function Page() {
   const hasMorePages = meta && page < meta.totalPages;
 
   if (isError) return <div>Error</div>;
-
-  console.log(PublicPrompts);
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
@@ -244,7 +242,7 @@ function Page() {
                     <ThumbsUp
                       className="w-4 h-4 cursor-pointer"
                       color="white"
-                      onClick={handleLike}
+                      onClick={() => handleLike(prompt.id)}
                     />
                     <p className="text-white text-sm">
                       {prompt.likes?.length || 0} Likes
