@@ -33,7 +33,32 @@ export class PromptsService {
     });
 
     const savedPrompt = await this.promptRepo.save(prompt);
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
+    // Update tokens based on premium status
+    if (user.isPremium) {
+      // Premium users: unlimited tokens - only increment tokensUsed, don't touch tokensRemaining
+      user.tokensUsed = user.tokensUsed + 1;
+      // Keep tokensRemaining unchanged (effectively unlimited)
+    } else {
+      // Non-premium users: check if they have enough tokens
+      if (user.tokensRemaining <= 0) {
+        throw new BadRequestException(
+          'Insufficient tokens. Please upgrade to premium or wait for token refresh.',
+        );
+      }
+
+      // Subtract 1 from tokens remaining, add 1 to tokens used
+      user.tokensRemaining = user.tokensRemaining - 1;
+      user.tokensUsed = user.tokensUsed + 1;
+    }
+
+    await this.userRepo.save(user);
     return savedPrompt;
   }
   async getPromptByModel(model: string, userId: number) {

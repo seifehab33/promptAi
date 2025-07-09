@@ -10,7 +10,7 @@ import useCreatePrompt from "@/api/useCreatePrompt";
 import useGetPromptByModel from "@/api/useGetPromptByModel";
 import useSavePrompt from "@/api/useSavePrompt";
 import { Badge } from "@/components/ui/badge";
-import PromptFormFields from "@/components/PromptFormFields";
+import PromptFormFields from "@/components/prompts/PromptFormFields";
 import { Textarea } from "@/components/ui/textarea";
 import FullScreen from "@/components/Dialogs/FullScreen";
 

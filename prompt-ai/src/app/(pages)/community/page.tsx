@@ -9,7 +9,7 @@ import { useGetPublicPrompt, useLikePrompt } from "@/api/useGetPublicPrompt";
 import { PublicPrompt } from "@/types/type";
 import { toast } from "sonner";
 import { useUser } from "@/context/userContext";
-import PromptCard from "@/components/PromptCard";
+import PromptCard from "@/components/prompts/PromptCard";
 
 function Page() {
   const [page, setPage] = useState(1);

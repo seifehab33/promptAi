@@ -7,7 +7,6 @@ import useLogout from "@/api/useLogout";
 import { usePathname, useRouter } from "next/navigation";
 import { Badge } from "../ui/badge";
 import { useUser } from "@/context/userContext";
-import { parseCookies } from "nookies";
 function AuthNav() {
   const router = useRouter();
   const { logout, isPending } = useLogout();
@@ -22,9 +21,6 @@ function AuthNav() {
   const handlePublicCommunity = () => {
     router.push("/community");
   };
-  const cookies = parseCookies();
-  const accessToken = cookies.access_token;
-  // const userName = accessToken?.split(".")[1];
   return (
     <div>
       <header className="relative bg-white/10 backdrop-blur-md border-b border-white/20 py-4 shadow-lg">

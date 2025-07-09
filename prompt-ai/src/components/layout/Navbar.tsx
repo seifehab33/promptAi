@@ -11,7 +11,17 @@ const Navbar = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
+  const ScrollToFeatures = (e: React.MouseEvent, section: string) => {
+    e.preventDefault();
+    const specificSection = document.getElementById(section);
+    if (specificSection) {
+      specificSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+    setIsMenuOpen(false);
+  };
   return (
     <header className="relative z-50 bg-white/90 dark:bg-promptsmith-dark/90 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -28,24 +38,19 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/features"
-            className="text-foreground hover:text-promptsmith-purple transition-colors"
+          <button
+            onClick={(e) => ScrollToFeatures(e, "features")}
+            className="text-foreground hover:text-promptsmith-purple transition-colors cursor-pointer"
           >
             Features
-          </Link>
-          <Link
-            href="/templates"
-            className="text-foreground hover:text-promptsmith-purple transition-colors"
-          >
-            Templates
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-foreground hover:text-promptsmith-purple transition-colors"
+          </button>
+
+          <button
+            onClick={(e) => ScrollToFeatures(e, "pricing")}
+            className="text-foreground hover:text-promptsmith-purple transition-colors cursor-pointer"
           >
             Pricing
-          </Link>
+          </button>
           <div className="flex items-center space-x-2">
             <Link href="/SignIn">
               <Button variant="outline">Sign In</Button>
@@ -68,27 +73,19 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-background border-b border-border shadow-lg">
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <Link
-              href="/features"
-              className="text-foreground hover:text-promptsmith-purple transition-colors py-2"
-              onClick={toggleMenu}
+            <button
+              onClick={(e) => ScrollToFeatures(e, "features")}
+              className="text-foreground hover:text-promptsmith-purple transition-colors py-2 text-left"
             >
               Features
-            </Link>
-            <Link
-              href="/templates"
+            </button>
+
+            <button
+              onClick={(e) => ScrollToFeatures(e, "pricing")}
               className="text-foreground hover:text-promptsmith-purple transition-colors py-2"
-              onClick={toggleMenu}
-            >
-              Templates
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-foreground hover:text-promptsmith-purple transition-colors py-2"
-              onClick={toggleMenu}
             >
               Pricing
-            </Link>
+            </button>
             <div className="flex flex-col space-y-2 pt-2 border-t border-border">
               <Link href="/SignIn" onClick={toggleMenu}>
                 <Button variant="outline" className="w-full">

@@ -75,4 +75,42 @@ export class UserService {
     Object.assign(user, dto);
     return this.repo.save(user);
   }
+
+  async resetTokensForNonPremiumUsers() {
+    // Reset tokens remaining to 10 for non-premium users
+    // This should be called every 5 hours
+    const fiveHoursAgo = new Date();
+    fiveHoursAgo.setHours(fiveHoursAgo.getHours() - 5);
+
+    // Find non-premium users and reset their tokens
+    const nonPremiumUsers = await this.repo.find({
+      where: { isPremium: false },
+    });
+
+    for (const user of nonPremiumUsers) {
+      // Check if it's been more than 5 hours since last token reset
+      const lastTokenReset = user.updatedAt || user.createdAt;
+      if (lastTokenReset < fiveHoursAgo) {
+        user.tokensRemaining = 10;
+        user.tokensUsed = 0;
+        user.updatedAt = new Date();
+        await this.repo.save(user);
+      }
+    }
+
+    return {
+      message: 'Tokens reset for non-premium users',
+      resetCount: nonPremiumUsers.length,
+    };
+  }
+
+  async getTokenStatus(userId: number) {
+    const user = await this.findById(userId);
+    return {
+      tokensRemaining: user.tokensRemaining,
+      tokensUsed: user.tokensUsed,
+      isPremium: user.isPremium,
+      lastUpdated: user.updatedAt,
+    };
+  }
 }

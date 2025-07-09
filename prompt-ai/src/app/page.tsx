@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import responseai from "@/assets/images/response ai.svg";
 
 import Image from "next/image";
+import Pricing from "@/components/pricing/Pricing";
 
 const Index = () => {
   return (
@@ -92,7 +93,7 @@ const Index = () => {
                         </span>
                         <div className="ml-4 bg-muted p-4 rounded-lg rounded-tl-none">
                           <p className="text-sm md:text-base">
-                            I&apos;xd be happy to help with your product
+                            I&apos;d be happy to help with your product
                             descriptions. To create the most compelling content,
                             could you tell me more about:
                             <br />
@@ -116,7 +117,7 @@ const Index = () => {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 bg-muted">
+        <section className="py-16 bg-muted" id="features">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-2 gradient-text decorative-border inline-block">
@@ -189,6 +190,9 @@ const Index = () => {
               </Button>
             </Link>
           </div>
+        </section>
+        <section className="" id="pricing">
+          <Pricing />
         </section>
       </main>
 

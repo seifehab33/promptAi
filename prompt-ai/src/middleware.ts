@@ -7,16 +7,55 @@ const serverApi = axios.create({
   timeout: 10000,
 });
 
+// Reusable function to attempt token refresh
+async function attemptTokenRefresh(refreshToken: string) {
+  try {
+    const refreshResponse = await serverApi.post(
+      "/auth/refresh",
+      {},
+      {
+        headers: {
+          Cookie: `refresh_token=${refreshToken}`,
+        },
+      }
+    );
+
+    if (refreshResponse.status === 200) {
+      console.log("✅ Middleware: Token refresh successful");
+      return {
+        success: true,
+        cookies: refreshResponse.headers["set-cookie"],
+      };
+    }
+  } catch (error: unknown) {
+    const axiosError = error as {
+      response?: { status?: number; data?: unknown };
+    };
+    console.log(
+      "❌ Middleware: Token refresh error:",
+      axiosError.response?.status,
+      axiosError.response?.data
+    );
+
+    return {
+      success: false,
+      isUnauthorized: axiosError.response?.status === 401,
+    };
+  }
+
+  return { success: false, isUnauthorized: false };
+}
+
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
+
   const protectedRoutes = [
     "/dashboard",
     "/editor",
     "/community",
     "/editor/:path*",
   ];
-  const isMainPage = req.nextUrl.pathname === "/";
   const authRoutes = [
     "/SignIn",
     "/SignUp",
@@ -24,115 +63,71 @@ export async function middleware(req: NextRequest) {
     "/reset-password",
   ];
 
+  const isMainPage = req.nextUrl.pathname === "/";
   const isProtected = protectedRoutes.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
-
   const isAuthRoute = authRoutes.some(
     (route) =>
       req.nextUrl.pathname === route ||
       req.nextUrl.pathname.startsWith(`${route}/`)
   );
 
-  // If accessing a protected route without a valid token, try to refresh
-  if (isProtected && (!token || token.trim() === "")) {
-    // If we have a refresh token, try to refresh
-    if (refreshToken) {
-      console.log("🔄 Middleware: No access token, attempting refresh...");
-      console.log(
-        "🔄 Middleware: Refresh token exists:",
-        refreshToken.substring(0, 20) + "..."
-      );
+  const hasValidToken = token && token.trim() !== "";
+  const hasRefreshToken = refreshToken && refreshToken.trim() !== "";
 
-      try {
-        const refreshResponse = await serverApi.post(
-          "/auth/refresh",
-          {},
-          {
-            headers: {
-              Cookie: `refresh_token=${refreshToken}`,
-            },
-          }
-        );
+  // Handle protected routes without valid token
+  if (isProtected && !hasValidToken) {
+    if (hasRefreshToken) {
+      const refreshResult = await attemptTokenRefresh(refreshToken);
 
-        if (refreshResponse.status === 200) {
-          console.log("✅ Middleware: Token refresh successful");
-          // Get the new cookies from the response
-          const setCookieHeader = refreshResponse.headers["set-cookie"];
-          if (setCookieHeader) {
-            console.log(
-              "✅ Middleware: Setting new cookies:",
-              setCookieHeader.length
-            );
-            // Create response with new cookies
-            const response = NextResponse.next();
-            // Set both cookies from the response
-            setCookieHeader.forEach((cookie) => {
-              response.headers.append("set-cookie", cookie);
-            });
-            return response;
-          }
-        } else {
-          console.log(
-            "❌ Middleware: Token refresh failed with status:",
-            refreshResponse.status
-          );
-        }
-      } catch (error: unknown) {
-        const axiosError = error as {
-          response?: { status?: number; data?: unknown };
-        };
-        console.log(
-          "❌ Middleware: Token refresh error:",
-          axiosError.response?.status,
-          axiosError.response?.data
-        );
-
-        // If it's a 401, the refresh token is invalid/expired
-        if (axiosError.response?.status === 401) {
-          // Clear cookies on invalid refresh token
-          const response = NextResponse.redirect(new URL("/SignIn", req.url));
-          response.cookies.delete("access_token");
-          response.cookies.delete("refresh_token");
-          return response;
-        }
+      if (refreshResult.success && refreshResult.cookies) {
+        const response = NextResponse.next();
+        refreshResult.cookies.forEach((cookie) => {
+          response.headers.append("set-cookie", cookie);
+        });
+        return response;
       }
-    } else {
-      console.log("❌ Middleware: No refresh token available");
+
+      if (refreshResult.isUnauthorized) {
+        const response = NextResponse.redirect(new URL("/SignIn", req.url));
+        response.cookies.delete("access_token");
+        response.cookies.delete("refresh_token");
+        return response;
+      }
     }
-    console.log("🔄 Middleware: Redirecting to login");
-    // If refresh failed or no refresh token, redirect to login
+
     return NextResponse.redirect(new URL("/SignIn", req.url));
   }
 
-  // // If user has access token and is on main page, redirect to dashboard
-  if (isMainPage && token && token.trim() !== "") {
-    console.log(
-      "🔄 Middleware: Authenticated user on main page, redirecting to dashboard"
-    );
+  // Handle auth routes with refresh token but no access token
+  if (isAuthRoute && !hasValidToken && hasRefreshToken) {
+    const refreshResult = await attemptTokenRefresh(refreshToken);
+
+    if (refreshResult.success && refreshResult.cookies) {
+      const response = NextResponse.redirect(new URL("/dashboard", req.url));
+      refreshResult.cookies.forEach((cookie) => {
+        response.headers.append("set-cookie", cookie);
+      });
+      return response;
+    }
+
+    if (refreshResult.isUnauthorized) {
+      const response = NextResponse.next();
+      response.cookies.delete("access_token");
+      response.cookies.delete("refresh_token");
+      return response;
+    }
+  }
+
+  // Redirect authenticated users from main page to dashboard
+  if (isMainPage && hasValidToken) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  // If user has access token and tries to access auth pages, redirect to dashboard
-  if (isAuthRoute && token && token.trim() !== "") {
-    console.log(
-      "🔄 Middleware: Authenticated user on auth page, redirecting to dashboard"
-    );
+  // Redirect authenticated users from auth pages to dashboard
+  if (isAuthRoute && hasValidToken) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  // // If user has valid token and is accessing protected route, allow access
-  // if (isProtected && token && token.trim() !== "") {
-  //   console.log(
-  //     "✅ Middleware: Authenticated user accessing protected route, allowing access"
-  //   );
-  //   return NextResponse.next();
-  // }
-
-  // Allow access to main page for unauthenticated users
-  if (isMainPage && (!token || token.trim() === "")) {
-    console.log("✅ Middleware: Allowing unauthenticated access to main page");
-    return NextResponse.next();
   }
 
   return NextResponse.next();

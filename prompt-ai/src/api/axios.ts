@@ -18,7 +18,6 @@ const scheduleTokenRefresh = () => {
     clearTimeout(refreshTimeout);
   }
 
-  // Schedule refresh 2 minutes before expiration (13 minutes after login)
   const refreshTime = 13 * 60 * 1000; // 13 minutes in milliseconds
   refreshTimeout = setTimeout(async () => {
     // Prevent multiple simultaneous refreshes

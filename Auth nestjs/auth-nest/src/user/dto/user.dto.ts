@@ -1,5 +1,12 @@
 // src/users/dto/create-user.dto.ts
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -14,4 +21,12 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   role: string;
+  @IsNumber()
+  tokensFree: number;
+  @IsNumber()
+  tokensUsed: number;
+  @IsNumber()
+  tokensRemaining: number;
+  @IsBoolean()
+  isPremium: boolean;
 }

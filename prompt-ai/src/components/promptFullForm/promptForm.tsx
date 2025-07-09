@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/select";
 import { PublicPrivateSwitch } from "@/components/Switch/public-private-switch";
 import { Zap } from "lucide-react";
-import PromptFormFields from "@/components/PromptFormFields";
-import TextPrompt from "@/app/(pages)/editor/_textPrompt";
-import ImagePrompt from "@/app/(pages)/editor/_imagePrompt";
+import PromptFormFields from "@/components/prompts/PromptFormFields";
+import TextPrompt from "@/components/editor/_textPrompt";
+import ImagePrompt from "@/components/editor/_imagePrompt";
 import { Textarea } from "@/components/ui/textarea";
 import useSavePrompt from "@/api/useSavePrompt";
 

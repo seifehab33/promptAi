@@ -1,8 +1,19 @@
+"use client";
+
 import Link from "next/link";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
+  const scrollToFeatures = (e: React.MouseEvent, section: string) => {
+    e.preventDefault();
+    const specificSection = document.getElementById(section);
+    if (specificSection) {
+      specificSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
   return (
     <footer className="bg-muted py-12">
       <div className="container mx-auto px-4">
@@ -33,28 +44,21 @@ const Footer = () => {
             <h3 className="font-semibold text-lg">Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/features"
+                <button
+                  onClick={(e) => scrollToFeatures(e, "features")}
                   className="text-muted-foreground hover:text-promptsmith-purple transition-colors"
                 >
                   Features
-                </Link>
+                </button>
               </li>
+
               <li>
-                <Link
-                  href="/templates"
-                  className="text-muted-foreground hover:text-promptsmith-purple transition-colors"
-                >
-                  Templates
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/pricing"
+                <button
+                  onClick={(e) => scrollToFeatures(e, "pricing")}
                   className="text-muted-foreground hover:text-promptsmith-purple transition-colors"
                 >
                   Pricing
-                </Link>
+                </button>
               </li>
             </ul>
           </div>

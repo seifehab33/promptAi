@@ -3,7 +3,7 @@ import useGetLikes from "@/api/useGetLikes";
 import { formatDate } from "@/lib/utils";
 import { Clock, Copy, ThumbsUp } from "lucide-react";
 import Image from "next/image";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import person from "@/assets/images/unknown-person.png";
 
 function PromptCard({

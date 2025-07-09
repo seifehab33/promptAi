@@ -25,6 +25,14 @@ export class User {
 
   @OneToMany(() => PromptEntity, (prompt) => prompt.user)
   prompts: PromptEntity[];
+  @Column({ default: 10 })
+  tokensFree: number;
+  @Column({ default: 0 })
+  tokensUsed: number;
+  @Column({ default: 10 })
+  tokensRemaining: number;
+  @Column({ default: false })
+  isPremium: boolean;
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   @Transform(({ value }) => formatDate(value))
   createdAt: Date;

@@ -16,14 +16,14 @@ import TagInput from "@/components/TagInput";
 
 // import ComparisonView from "@/components/ComparisonView";
 import { useRouter } from "next/navigation";
-import TextPrompt from "./_textPrompt";
+import TextPrompt from "../../../components/editor/_textPrompt";
 import { Textarea } from "@/components/ui/textarea";
-import ImagePrompt from "./_imagePrompt";
+import ImagePrompt from "../../../components/editor/_imagePrompt";
 import useSavePrompt from "@/api/useSavePrompt";
 import { PublicPrivateSwitch } from "@/components/Switch/public-private-switch";
 import { useUser } from "@/context/userContext";
 import { Badge } from "@/components/ui/badge";
-import Library from "./_library";
+import Library from "../../../components/editor/_library";
 const promptTypes = [
   { value: "chat", label: "Chat Prompt", icon: "💬" },
   { value: "image", label: "Image Prompt", icon: "🎨" },

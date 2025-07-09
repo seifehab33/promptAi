@@ -129,7 +129,6 @@ export class AuthService {
       };
       const user = await this.userService.create(payload);
       const tokens = await this.generateTokens(user);
-
       return {
         data: {
           ...tokens,
