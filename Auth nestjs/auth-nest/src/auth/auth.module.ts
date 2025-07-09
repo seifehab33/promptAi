@@ -11,20 +11,24 @@ import { BlacklistedTokenModule } from 'src/blacklisted-token/blacklisted-token.
 import { BlacklistedToken } from 'src/blacklisted-token/entities/blacklisted-token.entity';
 import { ResetPasswordsEnitity } from './entities/reset-passwords.entity';
 import { EmailService } from './email.service';
-import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     UserModule,
     BlacklistedTokenModule,
-    JwtModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN'),
-        },
-      }),
-      inject: [ConfigService],
+    // JwtModule.registerAsync({
+    //   useFactory: async (configService: ConfigService) => ({
+    //     secret: configService.get<string>('JWT_SECRET'),
+    //     signOptions: {
+    //       expiresIn: configService.get<string>('JWT_EXPIRES_IN'),
+    //     },
+    //   }),
+    //   inject: [ConfigService],
+    // }),
+    JwtModule.register({
+      global: true,
+      secret: 'ssssss$%$#',
+      signOptions: { expiresIn: '1h' },
     }),
     TypeOrmModule.forFeature([
       RefreshToken,

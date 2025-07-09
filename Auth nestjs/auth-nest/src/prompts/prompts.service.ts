@@ -8,12 +8,15 @@ import { PromptEntity } from './entity/prompt.entity';
 import { MoreThan, Repository } from 'typeorm';
 import { PromptDto } from './dto/prompt.dto';
 import getUserNameFromUserId from 'src/utils/getUserName';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class PromptsService {
   constructor(
     @InjectRepository(PromptEntity)
     private readonly promptRepo: Repository<PromptEntity>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
   async createPrompt(dto: PromptDto, userId: number) {
@@ -214,28 +217,57 @@ export class PromptsService {
 
   async likePrompt(promptId: number, userId: number) {
     const prompt = await this.promptRepo.findOne({
-      where: { id: promptId, user: { id: userId } },
+      where: { id: promptId },
       relations: ['user'],
     });
     if (!prompt) {
       throw new NotFoundException('Prompt not Found');
     }
+
+    // Get the current user who is liking the prompt
+    const currentUser = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!currentUser) {
+      throw new NotFoundException('User not found');
+    }
+
     // Ensure likes is always an array
     if (!Array.isArray(prompt.likes)) {
       prompt.likes = [];
     }
 
-    const userName = getUserNameFromUserId(userId, prompt.user);
-
-    if (prompt.likes?.includes(userName)) {
+    if (prompt.likes?.includes(currentUser.name)) {
       throw new BadRequestException('You have already liked this prompt');
       // prompt.likes = prompt.likes.filter((id: string) => id !== userName);
     } else {
-      prompt.likes = [...prompt.likes, userName];
+      prompt.likes = [...prompt.likes, currentUser.name];
     }
     return this.promptRepo.save(prompt);
   }
+  async getPromptLikes(promptId: number, user: any) {
+    const prompt = await this.promptRepo.findOne({
+      where: { id: promptId },
+      relations: ['user'],
+    });
 
+    if (!prompt) {
+      throw new NotFoundException('Prompt not Found');
+    }
+
+    if (prompt.likes?.includes(user.username)) {
+      return {
+        liked: true,
+        likes: prompt.likes,
+      };
+    } else {
+      return {
+        liked: false,
+        likes: prompt.likes,
+      };
+    }
+  }
   async checkPromptExists(
     promptTitle: string,
     promptModel: string,

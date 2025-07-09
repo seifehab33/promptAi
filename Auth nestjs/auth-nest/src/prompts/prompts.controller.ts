@@ -82,7 +82,10 @@ export class PromptsController {
   async likePrompt(@Param('id') id: number, @GetUser() user: any) {
     return this.promptsService.likePrompt(id, user.userId);
   }
-
+  @Get('likes/:id')
+  async getPromptLikes(@Param('id') id: number, @GetUser() user: any) {
+    return this.promptsService.getPromptLikes(id, user);
+  }
   @Get('check-exists')
   async checkPromptExists(
     @Query('promptTitle') promptTitle: string,

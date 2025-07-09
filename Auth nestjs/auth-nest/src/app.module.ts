@@ -5,19 +5,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
-// import { RoleModule } from './role/role.module';
 import { LoggerMiddleware } from './logger.middleware';
-// import { Role } from './role/enitites/role.entity';
 import { BlacklistedTokenModule } from './blacklisted-token/blacklisted-token.module';
 import { BlacklistedToken } from './blacklisted-token/entities/blacklisted-token.entity';
 import { PromptsModule } from './prompts/prompts.module';
 import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      load: [configuration],
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -32,7 +31,6 @@ import { ConfigModule } from '@nestjs/config';
     TypeOrmModule.forFeature([User, BlacklistedToken]),
     AuthModule,
     UserModule,
-    // RoleModule,
     BlacklistedTokenModule,
     PromptsModule,
   ],
@@ -41,6 +39,6 @@ import { ConfigModule } from '@nestjs/config';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*'); // log all routes
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

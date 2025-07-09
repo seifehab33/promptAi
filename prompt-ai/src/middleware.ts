@@ -12,7 +12,6 @@ export async function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get("refresh_token")?.value;
   const protectedRoutes = [
     "/dashboard",
-    "/Dashboard",
     "/editor",
     "/community",
     "/editor/:path*",
@@ -29,8 +28,10 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.pathname.startsWith(route)
   );
 
-  const isAuthRoute = authRoutes.some((route) =>
-    req.nextUrl.pathname.startsWith(route)
+  const isAuthRoute = authRoutes.some(
+    (route) =>
+      req.nextUrl.pathname === route ||
+      req.nextUrl.pathname.startsWith(`${route}/`)
   );
 
   // If accessing a protected route without a valid token, try to refresh
@@ -104,7 +105,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/SignIn", req.url));
   }
 
-  // If user has access token and is on main page, redirect to dashboard
+  // // If user has access token and is on main page, redirect to dashboard
   if (isMainPage && token && token.trim() !== "") {
     console.log(
       "🔄 Middleware: Authenticated user on main page, redirecting to dashboard"
@@ -120,6 +121,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
+  // // If user has valid token and is accessing protected route, allow access
+  // if (isProtected && token && token.trim() !== "") {
+  //   console.log(
+  //     "✅ Middleware: Authenticated user accessing protected route, allowing access"
+  //   );
+  //   return NextResponse.next();
+  // }
+
   // Allow access to main page for unauthenticated users
   if (isMainPage && (!token || token.trim() === "")) {
     console.log("✅ Middleware: Allowing unauthenticated access to main page");
@@ -132,8 +141,10 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/",
+    "/dashboard",
+    "/editor",
+    "/community",
     "/dashboard/:path*",
-    "/Dashboard/:path*",
     "/editor/:path*",
     "/SignIn/:path*",
     "/SignUp/:path*",

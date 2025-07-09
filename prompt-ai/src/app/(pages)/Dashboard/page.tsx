@@ -72,6 +72,7 @@ const Dashboard = () => {
     }
 
     savePrompt({
+      promptContent: prompt,
       promptTitle: promptTitle,
       promptDescription:
         currentResponse || responses[responses.length - 1].text,
@@ -80,8 +81,9 @@ const Dashboard = () => {
       isPublic: isPublic || false,
       promptModel: "gpt-4o-mini",
     });
-    setContext("");
     setPromptTitle("");
+    setPrompt("");
+    setContext("");
     setIsPublic(false);
   };
 
@@ -102,7 +104,6 @@ const Dashboard = () => {
         duration: 3000,
       }
     );
-    setPrompt("");
   };
 
   const handleSharePrompt = () => {

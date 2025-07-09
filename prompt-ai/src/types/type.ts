@@ -87,3 +87,7 @@ export interface PromptFormFieldsProps {
   showPublicToggle?: boolean;
   className?: string;
 }
+export interface Likes {
+  liked: boolean;
+  likes: string[];
+}
