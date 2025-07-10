@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Copy, Check, Sparkles, Zap, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import useCreatePrompt from "@/api/useCreatePrompt";
 import useSavePrompt from "@/api/useSavePrompt";
@@ -49,7 +49,8 @@ const Dashboard = () => {
   } = useCreatePrompt("gpt-4o-mini");
   const { savePrompt, data: savedPrompt } = useSavePrompt();
   const [isPublic, setIsPublic] = useState(false);
-
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "create";
   const handleCopy = async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -168,6 +169,17 @@ const Dashboard = () => {
     return "Generate Response";
   }, [isStreaming, Tokens]);
 
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", value);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  const checkUnlimitedTokens = useMemo(() => {
+    if (Tokens?.tokensRemaining === 999999) {
+      return "Unlimited Credits Remaining";
+    }
+    return `${Tokens?.tokensRemaining} Credits Remaining`;
+  }, [Tokens]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated background elements */}
@@ -198,7 +210,7 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="create" className="w-full">
+        <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="mb-6 bg-white/10 backdrop-blur-md border-white/20">
             <TabsTrigger
               value="create"
@@ -230,7 +242,7 @@ const Dashboard = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30">
-                        {Tokens?.tokensRemaining} Credits Remaining
+                        {checkUnlimitedTokens}
                       </Badge>
                     </div>
                   </CardHeader>

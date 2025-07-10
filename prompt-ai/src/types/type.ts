@@ -6,6 +6,7 @@ export interface SignUpData {
   name: string;
   email: string;
   password: string;
+  isPremium?: boolean;
 }
 export interface SignResponse {
   access_token: string;

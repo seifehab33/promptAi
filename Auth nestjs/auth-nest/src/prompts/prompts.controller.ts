@@ -52,7 +52,6 @@ export class PromptsController {
 
   @Get('check-tokens')
   async checkTokens(@GetUser() user: any) {
-    console.log('🔍 Controller received user:', user);
     return this.promptsService.checkTokens(user.userId);
   }
 

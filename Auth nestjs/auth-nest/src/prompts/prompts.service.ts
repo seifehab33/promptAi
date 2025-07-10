@@ -62,11 +62,9 @@ export class PromptsService {
     return savedPrompt;
   }
   async checkTokens(userId: number) {
-    console.log('🔍 checkTokens called with userId:', userId);
     const user = await this.userRepo.findOne({
       where: { id: userId },
     });
-    console.log('🔍 Found user:', user);
     if (!user) {
       throw new NotFoundException('User not found');
     }

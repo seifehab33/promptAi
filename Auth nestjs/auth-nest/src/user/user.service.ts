@@ -1,36 +1,29 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/user.dto';
-// import { Role } from 'src/role/enitites/role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { randomBytes, scrypt as _scrypt } from 'crypto';
+import { scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
-import { BlacklistedToken } from 'src/blacklisted-token/entities/blacklisted-token.entity';
-import { BlacklistedTokenDto } from 'src/blacklisted-token/dto/blacklist-token.dto';
-import { JwtService } from '@nestjs/jwt';
+
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly repo: Repository<User>,
-    // @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
   ) {}
 
   async create(dto: CreateUserDto) {
-    // const role = await this.roleRepo.findOneBy({ name: dto.role });
-    // if (!role) {
-    //   throw new NotFoundException(`Role ${dto.role} not found`);
-    // }
-    const user = this.repo.create({
+    const userData = {
       ...dto,
-    });
+      tokensRemaining: dto.isPremium ? 999999 : dto.tokensRemaining || 10,
+      tokensUsed: dto.tokensUsed || 0,
+      tokensFree: dto.isPremium ? 999999 : dto.tokensFree || 10,
+    };
+
+    const user = this.repo.create(userData);
     return this.repo.save(user);
   }
   async getProfile(id: number) {
@@ -77,18 +70,14 @@ export class UserService {
   }
 
   async resetTokensForNonPremiumUsers() {
-    // Reset tokens remaining to 10 for non-premium users
-    // This should be called every 5 hours
     const fiveHoursAgo = new Date();
     fiveHoursAgo.setHours(fiveHoursAgo.getHours() - 5);
 
-    // Find non-premium users and reset their tokens
     const nonPremiumUsers = await this.repo.find({
       where: { isPremium: false },
     });
 
     for (const user of nonPremiumUsers) {
-      // Check if it's been more than 5 hours since last token reset
       const lastTokenReset = user.updatedAt || user.createdAt;
       if (lastTokenReset < fiveHoursAgo) {
         user.tokensRemaining = 10;

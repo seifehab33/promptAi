@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
@@ -35,15 +36,15 @@ const Index = () => {
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/features">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                >
-                  Learn More
-                </Button>
-              </Link>
+
+              <button
+                onClick={() => {
+                  window.scrollTo({ top: 1000, behavior: "smooth" });
+                }}
+                className="w-full sm:w-auto bg-promptsmith-purple text-white hover:bg-promptsmith-purple/80 px-3  rounded-md"
+              >
+                Learn More
+              </button>
             </div>
 
             <div className="relative max-w-5xl mx-auto">

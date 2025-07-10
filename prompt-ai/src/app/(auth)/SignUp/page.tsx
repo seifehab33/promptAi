@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Mail, User, Crown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import useCreateUser from "@/api/useCreateUser";
 
@@ -24,6 +24,7 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const { mutate } = useCreateUser();
 
   const validateDataAdvanced = (data: {
@@ -79,7 +80,12 @@ const SignUp = () => {
 
     setIsLoading(true);
 
-    mutate({ name, email, password });
+    mutate({
+      name,
+      email,
+      password,
+      isPremium,
+    });
   };
 
   const togglePasswordVisibility = () => {
@@ -105,13 +111,13 @@ const SignUp = () => {
 
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>Sign Up</CardTitle>
+            <CardTitle>Create Your Account</CardTitle>
             <CardDescription>
-              Enter your information to create an account
+              Choose your plan and enter your information to get started
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <div className="relative">
@@ -171,9 +177,47 @@ const SignUp = () => {
                     required
                   />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground">
                   Password must be at least 8 characters long
                 </p>
+              </div>
+
+              {/* Compact Premium Toggle */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">
+                  Choose Your Plan
+                </Label>
+                <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setIsPremium(false)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium transition-all duration-200 ${
+                      !isPremium
+                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    }`}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Free
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsPremium(true)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium transition-all duration-200 ${
+                      isPremium
+                        ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    }`}
+                  >
+                    <Crown className="h-4 w-4" />
+                    Premium
+                  </button>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  {isPremium
+                    ? "Unlimited tokens • Advanced features • Priority support"
+                    : "10 tokens/day • Basic features • Community access"}
+                </div>
               </div>
 
               <div className="flex items-center space-x-2">
