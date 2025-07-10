@@ -50,6 +50,25 @@ export class PromptsController {
     return this.promptsService.getPromptByQuery(query, user.userId);
   }
 
+  @Get('check-tokens')
+  async checkTokens(@GetUser() user: any) {
+    console.log('🔍 Controller received user:', user);
+    return this.promptsService.checkTokens(user.userId);
+  }
+
+  @Get('check-exists')
+  async checkPromptExists(
+    @Query('promptTitle') promptTitle: string,
+    @Query('promptModel') promptModel: string,
+    @GetUser() user: any,
+  ) {
+    return this.promptsService.checkPromptExists(
+      promptTitle,
+      promptModel,
+      user.userId,
+    );
+  }
+
   @Get(':id')
   getPromptById(@Param('id') id: number) {
     return this.promptsService.getPromptById(id);
@@ -85,18 +104,6 @@ export class PromptsController {
   @Get('likes/:id')
   async getPromptLikes(@Param('id') id: number, @GetUser() user: any) {
     return this.promptsService.getPromptLikes(id, user);
-  }
-  @Get('check-exists')
-  async checkPromptExists(
-    @Query('promptTitle') promptTitle: string,
-    @Query('promptModel') promptModel: string,
-    @GetUser() user: any,
-  ) {
-    return this.promptsService.checkPromptExists(
-      promptTitle,
-      promptModel,
-      user.userId,
-    );
   }
 
   @Post('check-exists')

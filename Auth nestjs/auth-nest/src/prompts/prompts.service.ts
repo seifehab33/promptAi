@@ -61,6 +61,29 @@ export class PromptsService {
     await this.userRepo.save(user);
     return savedPrompt;
   }
+  async checkTokens(userId: number) {
+    console.log('🔍 checkTokens called with userId:', userId);
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+    console.log('🔍 Found user:', user);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.tokensRemaining === 0) {
+      return {
+        tokensRemaining: 0,
+        tokensUsed: user.tokensUsed,
+        message:
+          'Insufficient tokens. Please upgrade to premium or wait for token refresh.',
+      };
+    }
+    return {
+      tokensRemaining: user.tokensRemaining,
+      tokensUsed: user.tokensUsed,
+      message: 'Tokens remaining',
+    };
+  }
   async getPromptByModel(model: string, userId: number) {
     const prompts = await this.promptRepo.find({
       where: { promptModel: model, user: { id: userId } },
@@ -299,6 +322,15 @@ export class PromptsService {
     userId: number,
     updateData?: any,
   ) {
+    // Get user to check premium status
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     // First, check if a prompt with the same title and model exists
     const existingPrompt = await this.promptRepo.findOne({
       where: {
@@ -341,6 +373,24 @@ export class PromptsService {
             updateData.promptContext || existingPrompt.promptContext,
         });
 
+        // Handle token logic based on premium status
+        if (user.isPremium) {
+          // Premium users: only increment tokensUsed, don't touch tokensRemaining
+          user.tokensUsed = user.tokensUsed + 1;
+        } else {
+          // Non-premium users: check if they have enough tokens
+          if (user.tokensRemaining <= 0) {
+            throw new BadRequestException(
+              'Insufficient tokens. Please upgrade to premium or wait for token refresh.',
+            );
+          }
+          // Subtract 1 from tokens remaining, add 1 to tokens used
+          user.tokensRemaining = user.tokensRemaining - 1;
+          user.tokensUsed = user.tokensUsed + 1;
+        }
+
+        await this.userRepo.save(user);
+
         return {
           exists: true,
           promptId: existingPrompt.id,
@@ -348,6 +398,9 @@ export class PromptsService {
           promptModel: existingPrompt.promptModel,
           updated: true,
           grouped: true,
+          isPremium: user.isPremium,
+          tokensRemaining: user.tokensRemaining,
+          tokensUsed: user.tokensUsed,
         };
       }
 
@@ -359,6 +412,9 @@ export class PromptsService {
         promptModel: existingPrompt.promptModel,
         updated: false,
         grouped: false,
+        isPremium: user.isPremium,
+        tokensRemaining: user.tokensRemaining,
+        tokensUsed: user.tokensUsed,
       };
     }
 
@@ -369,6 +425,9 @@ export class PromptsService {
       promptModel: null,
       updated: false,
       grouped: false,
+      isPremium: user.isPremium,
+      tokensRemaining: user.tokensRemaining,
+      tokensUsed: user.tokensUsed,
     };
   }
 }

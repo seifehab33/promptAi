@@ -91,3 +91,8 @@ export interface Likes {
   liked: boolean;
   likes: string[];
 }
+export interface CheckTokensResponse {
+  tokensRemaining: number;
+  tokensUsed: number;
+  message: string;
+}

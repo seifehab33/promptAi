@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import api from "./axios";
 
 const savePrompt = async (data: CreatePromptData) => {
-  // Use the provided title or generate a default
   const title =
     data.promptTitle?.trim() ||
     `AI Prompt - ${data.promptModel || "Unknown Model"}`;
@@ -19,7 +18,6 @@ const savePrompt = async (data: CreatePromptData) => {
     promptModel: data.promptModel || "gpt-4o-mini",
   };
 
-  // Always check for existing prompt first
   try {
     const response = await api.post(`/prompts/check-exists`, {
       promptTitle: title,
@@ -33,15 +31,12 @@ const savePrompt = async (data: CreatePromptData) => {
 
     if (response.data && response.data.exists) {
       if (response.data.updated) {
-        // Backend already updated the prompt with grouping logic
-
         return {
           ...response.data,
           isUpdate: true,
           grouped: response.data.grouped,
         };
       } else {
-        // Update the existing prompt manually
         const updateResponse = await api.put(
           `/prompts/${response.data.promptId}`,
           requestData
@@ -51,7 +46,6 @@ const savePrompt = async (data: CreatePromptData) => {
       }
     }
   } catch {
-    // Fallback: Get all prompts and check locally
     try {
       const existingPromptsResponse = await api.get("/prompts");
       const existingPrompts = existingPromptsResponse.data;
@@ -63,7 +57,6 @@ const savePrompt = async (data: CreatePromptData) => {
       );
 
       if (existingPrompt) {
-        // Update existing prompt manually
         const updateResponse = await api.put(
           `/prompts/${existingPrompt.id}`,
           requestData
@@ -73,8 +66,6 @@ const savePrompt = async (data: CreatePromptData) => {
       }
     } catch {}
   }
-
-  // Only create new prompt if no existing prompt found
 
   const response = await api.post("/prompts", requestData);
 
@@ -96,11 +87,11 @@ function useSavePrompt() {
 
       toast.success(message);
 
-      // Invalidate all prompt-related queries
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
       queryClient.invalidateQueries({ queryKey: ["prompts-model"] });
       queryClient.invalidateQueries({ queryKey: ["check-prompt-exists"] });
       queryClient.invalidateQueries({ queryKey: ["prompt"] });
+      queryClient.invalidateQueries({ queryKey: ["check-tokens"] });
     },
     onError: (error: AxiosError<ErrorResponse>) => {
       const errorMessage = error.response?.data?.message || error.message;

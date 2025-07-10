@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import AuthNav from "@/components/AuthNav/AuthNav";
+import useCheckTokens from "@/api/useCheckTokens";
 
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
@@ -37,6 +38,7 @@ const Dashboard = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const { data: Tokens, isPending } = useCheckTokens();
   const router = useRouter();
   const {
     generatePrompt,
@@ -86,10 +88,23 @@ const Dashboard = () => {
     setContext("");
     setIsPublic(false);
   };
-
+  const checkTokens = () => {
+    if (Tokens?.tokensRemaining && Tokens.tokensRemaining <= 0) {
+      toast.error(Tokens.message);
+      return false;
+    } else {
+      toast.success(Tokens?.message);
+      return true;
+    }
+  };
   const handleGenerateResponse = () => {
     if (!prompt.trim()) {
       toast.error("Please enter a prompt before generating");
+      return;
+    }
+
+    const hasTokens = checkTokens();
+    if (!hasTokens) {
       return;
     }
 
@@ -137,6 +152,21 @@ const Dashboard = () => {
       }
     );
   };
+
+  const isGenerateButtonDisabled = useMemo(() => {
+    return (
+      isStreaming ||
+      isPending ||
+      (Tokens?.tokensRemaining !== undefined && Tokens.tokensRemaining <= 0)
+    );
+  }, [isStreaming, isPending, Tokens]);
+
+  const getGenerateButtonText = useMemo(() => {
+    if (isStreaming) return "Generating...";
+    if (Tokens?.tokensRemaining !== undefined && Tokens.tokensRemaining == 0)
+      return "No Credits Available";
+    return "Generate Response";
+  }, [isStreaming, Tokens]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -198,6 +228,11 @@ const Dashboard = () => {
                         results
                       </CardDescription>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30">
+                        {Tokens?.tokensRemaining} Credits Remaining
+                      </Badge>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
@@ -241,9 +276,9 @@ const Dashboard = () => {
                     <Button
                       className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30"
                       onClick={handleGenerateResponse}
-                      disabled={isStreaming}
+                      disabled={isGenerateButtonDisabled}
                     >
-                      {isStreaming ? "Generating..." : "Generate Response"}
+                      {getGenerateButtonText}
                     </Button>
                   </CardFooter>
                 </Card>

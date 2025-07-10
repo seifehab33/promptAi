@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -31,17 +31,23 @@ function PromptForm() {
   const pdfRef = useRef<HTMLDivElement | null>(null);
   const { savePrompt, isPending } = useSavePrompt();
 
-  const handleSavePrompt = () => {
-    savePrompt({
-      promptTitle,
-      promptContext,
-      promptContent,
-      isPublic,
-      promptTags: tags,
-      promptModel: "gpt-4o-mini",
-      promptDescription: promptContext,
-    });
-  };
+  const handleSavePrompt = useMemo(() => {
+    return (
+      responseContent?: string,
+      model?: string,
+      promptContentToSave?: string
+    ) => {
+      savePrompt({
+        promptTitle,
+        promptContext,
+        promptContent: promptContentToSave || promptContent,
+        isPublic,
+        promptTags: tags,
+        promptModel: model || "gpt-4o-mini",
+        promptDescription: responseContent || promptContext,
+      });
+    };
+  }, [promptTitle, promptContent, isPublic, tags, promptContext, savePrompt]);
 
   return (
     <div className="lg:col-span-2">
