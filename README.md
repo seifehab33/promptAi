@@ -27,7 +27,8 @@
 ### 👥 Authentication & Dashboards
 - JWT-based auth system (Register/Login)
 - Personal dashboards
-
+### 💳 Payment Gateway (Coming Soon)
+PromptSmith is evolving! A secure and scalable payment gateway integration is in the works — enabling future support for premium prompt management features and AI usage plans.
 
 
 ---
