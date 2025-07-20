@@ -58,5 +58,6 @@
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/promptsmith.git
-cd promptsmith
+git clone https://github.com/seifehab33/promptAi
+cd auth-nest
+cd promptai
