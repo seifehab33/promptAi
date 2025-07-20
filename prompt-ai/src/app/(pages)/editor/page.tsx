@@ -11,10 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tag, Zap, ArrowLeft } from "lucide-react";
-// import { toast } from "sonner";
 import TagInput from "@/components/TagInput";
 
-// import ComparisonView from "@/components/ComparisonView";
 import { useRouter } from "next/navigation";
 import TextPrompt from "../../../components/editor/_textPrompt";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,12 +22,11 @@ import { PublicPrivateSwitch } from "@/components/Switch/public-private-switch";
 import { useUser } from "@/context/userContext";
 import { Badge } from "@/components/ui/badge";
 import Library from "../../../components/editor/_library";
+import PromptCheckTokens from "@/components/prompts/promptCheckTokens";
 const promptTypes = [
   { value: "chat", label: "Chat Prompt", icon: "💬" },
   { value: "image", label: "Image Prompt", icon: "🎨" },
   { value: "code", label: "Code Prompt", icon: "💻" },
-  // { value: "writing", label: "Writing Prompt" },
-  // { value: "other", label: "Other" },
 ];
 
 const PromptEditor = () => {
@@ -40,15 +37,12 @@ const PromptEditor = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [responses, setResponses] = useState<string[]>([]);
   const router = useRouter();
   const { user } = useUser();
   const userName = user?.name;
   const handleBackToDashboard = () => {
     router.push("/dashboard");
   };
-  // Predefined ratings to avoid hydration issues
   const { savePrompt, isPending } = useSavePrompt();
   const handleSavePrompt = useCallback(
     (
@@ -76,15 +70,6 @@ const PromptEditor = () => {
       promptType,
     ]
   );
-  // const handleSavePrompt = () => {
-  //   // In a real app, this would save to a database
-  //   toast.success("Your prompt has been saved to your library.");
-  // };
-
-  // const handleSharePrompt = () => {
-  //   // In a real app, this would generate a shareable link
-  //   toast.success("A shareable link has been copied to your clipboard.");
-  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -141,9 +126,12 @@ const PromptEditor = () => {
                 <div className="space-y-6">
                   {(promptType === "chat" || promptType === "code") && (
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-300">
-                        Prompt Title
-                      </label>
+                      <div className="flex items-center gap-2 justify-between">
+                        <label className="text-sm font-medium text-gray-300">
+                          Prompt Title
+                        </label>
+                        <PromptCheckTokens />
+                      </div>
                       <Input
                         placeholder="Enter a descriptive title..."
                         value={promptTitle}

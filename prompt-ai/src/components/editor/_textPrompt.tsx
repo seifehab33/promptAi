@@ -185,6 +185,19 @@ const TextPrompt = React.memo(function TextPrompt({
     [activeModel, chatGptHook, claudeHook, deepSeekHook, grokHook]
   );
 
+  // Memoize the handleSaveResponse function
+  const handleSaveResponse = useMemo(
+    () => (response: Response, modelName: string) => {
+      // Find the actual model identifier for this model name
+      const modelType = typesPrompt.find((type) => type.name === modelName);
+      const modelIdentifier = modelType?.model || modelName;
+      // Save the AI response and the prompt content used for generation
+      handleSavePrompt(response.text, modelIdentifier, response.prompt);
+      toast.success("Response saved successfully!");
+    },
+    [handleSavePrompt, typesPrompt]
+  );
+
   // Update responses when streaming completes for each model
   useEffect(() => {
     const updateResponse = (
@@ -209,19 +222,6 @@ const TextPrompt = React.memo(function TextPrompt({
         }));
         setActiveModel(null);
         setPendingPrompt((prev) => ({ ...prev, [modelName]: "" }));
-        // Auto-save prompt after 1.5 seconds
-        const timeoutId = setTimeout(() => {
-          // Find the actual model identifier for this model name
-          const modelType = typesPrompt.find((type) => type.name === modelName);
-          const modelIdentifier = modelType?.model || modelName;
-          // Save the AI response and the prompt content used for generation
-          handleSavePrompt(
-            hook.currentResponse,
-            modelIdentifier,
-            pendingPrompt[modelName]
-          );
-        }, 1500);
-        return () => clearTimeout(timeoutId);
       }
     };
     updateResponse(chatGptHook, "ChatGpt");
@@ -240,8 +240,6 @@ const TextPrompt = React.memo(function TextPrompt({
     activeModel,
     pendingPrompt,
     responses,
-    handleSavePrompt,
-    typesPrompt,
   ]);
 
   // Memoize the rendered accordion items to prevent unnecessary re-renders
@@ -307,21 +305,35 @@ const TextPrompt = React.memo(function TextPrompt({
                             </span>
                           </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCopy(response.text, response.id)}
-                          className="text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600"
-                        >
-                          {copiedId === response.id ? (
-                            <Check className="h-4 w-4 mr-2" />
-                          ) : (
-                            <Copy className="h-4 w-4 mr-2" />
-                          )}
-                          {copiedId === response.id
-                            ? "Copied!"
-                            : "Copy Response"}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleCopy(response.text, response.id)
+                            }
+                            className="text-gray-300 hover:text-white bg-gray-700 hover:bg-gray-600"
+                          >
+                            {copiedId === response.id ? (
+                              <Check className="h-4 w-4 mr-2" />
+                            ) : (
+                              <Copy className="h-4 w-4 mr-2" />
+                            )}
+                            {copiedId === response.id
+                              ? "Copied!"
+                              : "Copy Response"}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleSaveResponse(response, type.name)
+                            }
+                            className="text-green-300 hover:text-green-100 bg-green-700/20 hover:bg-green-700/30"
+                          >
+                            Save Response
+                          </Button>
+                        </div>
                       </div>
                     ))}
                     {isModelStreaming && (
@@ -394,9 +406,9 @@ const TextPrompt = React.memo(function TextPrompt({
     handleCopy,
     handleGenerateResponse,
     handleStopGeneration,
+    handleSaveResponse,
     isPending,
     pendingPrompt,
-    handleSavePrompt,
   ]);
 
   return (

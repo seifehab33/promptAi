@@ -1,5 +1,5 @@
 "use client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api, { stopAutoRefresh } from "./axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -13,12 +13,15 @@ const handleLogout = async () => {
 const useLogout = () => {
   const router = useRouter();
   const { refreshUser } = useUser();
+  const queryClient = useQueryClient();
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: handleLogout,
     onSuccess: () => {
       // Stop automatic token refresh
       stopAutoRefresh();
+      // Clear any cached token data
+      queryClient.removeQueries({ queryKey: ["check-tokens"] });
       // Refresh user context to clear user data
       refreshUser();
       toast.success("Logged out successfully", {

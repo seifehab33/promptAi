@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { User } from "@/types/type";
 import { GetUserNameFromCookieClient } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 // 1. Define the context type
 interface UserContextType {
@@ -27,6 +28,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 // 4. UserProvider component
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>(initialUser);
+  const queryClient = useQueryClient();
 
   const refreshUser = () => {
     const token = GetUserNameFromCookieClient();
@@ -34,8 +36,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     if (token && token.name) {
       setUser({ name: token.name, email: "" });
+      // Invalidate token-related queries when user changes
+      queryClient.invalidateQueries({ queryKey: ["check-tokens"] });
     } else {
       setUser(initialUser);
+      // Clear token-related queries when user logs out
+      queryClient.removeQueries({ queryKey: ["check-tokens"] });
     }
   };
 

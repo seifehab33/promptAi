@@ -30,6 +30,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import AuthNav from "@/components/AuthNav/AuthNav";
 import useCheckTokens from "@/api/useCheckTokens";
+import PromptCheckTokens from "@/components/prompts/promptCheckTokens";
 
 const Dashboard = () => {
   const [prompt, setPrompt] = useState("");
@@ -74,11 +75,17 @@ const Dashboard = () => {
       return;
     }
 
+    const allResponses = [
+      ...responses.map((response) => response.text),
+      ...(currentResponse ? [currentResponse] : []),
+    ];
+
+    const combinedDescription = allResponses.join("\n\n---\n\n");
+
     savePrompt({
       promptContent: prompt,
       promptTitle: promptTitle,
-      promptDescription:
-        currentResponse || responses[responses.length - 1].text,
+      promptDescription: combinedDescription,
       promptContext: context,
       promptTags: [],
       isPublic: isPublic || false,
@@ -174,12 +181,7 @@ const Dashboard = () => {
     params.set("tab", value);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
-  const checkUnlimitedTokens = useMemo(() => {
-    if (Tokens?.tokensRemaining === 999999) {
-      return "Unlimited Credits Remaining";
-    }
-    return `${Tokens?.tokensRemaining} Credits Remaining`;
-  }, [Tokens]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated background elements */}
@@ -240,11 +242,7 @@ const Dashboard = () => {
                         results
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 text-white hover:from-purple-500/30 hover:to-pink-500/30">
-                        {checkUnlimitedTokens}
-                      </Badge>
-                    </div>
+                    <PromptCheckTokens />
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>

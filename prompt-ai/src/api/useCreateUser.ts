@@ -1,6 +1,6 @@
 "use client";
 import { ErrorResponse, SignResponse, SignUpData } from "@/types/type";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api, { startAutoRefresh } from "./axios";
@@ -15,10 +15,12 @@ const createUser = async (data: SignUpData) => {
 function useCreateUser() {
   const { refreshUser } = useUser();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { mutate, data, error, isPending } = useMutation({
     mutationFn: createUser,
     onSuccess: () => {
       startAutoRefresh();
+      queryClient.removeQueries({ queryKey: ["check-tokens"] });
       toast.success("User created successfully!", {
         duration: 1200,
         className: "bg-green-500 text-white",

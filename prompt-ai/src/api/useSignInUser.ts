@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SignInData, SignResponse } from "@/types/type";
 import { useRouter } from "next/navigation";
@@ -14,12 +14,15 @@ const signInUser = async (data: SignInData) => {
 function useSignInUser() {
   const router = useRouter();
   const { refreshUser } = useUser();
+  const queryClient = useQueryClient();
 
   const { mutate, data, error, isPending } = useMutation({
     mutationFn: signInUser,
     onSuccess: () => {
       toast.success("User signed in successfully!");
       startAutoRefresh();
+      // Clear any cached token data
+      queryClient.removeQueries({ queryKey: ["check-tokens"] });
       // Refresh user context to get updated user data
       refreshUser();
       setTimeout(() => {
